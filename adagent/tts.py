@@ -5,6 +5,7 @@ import asyncio
 import base64
 import json
 import os
+import shutil
 import time
 import wave
 from pathlib import Path
@@ -477,12 +478,40 @@ def _to_clean_array(src: Path, cache_wav: Path) -> np.ndarray:
     return (audio * 32767).astype(np.int16)
 
 
+def _cache_settings(cfg: dict, voice: dict) -> dict:
+    """Only the settings that change the AUDIO belong in the cache key. Budgets, ledger paths and permission
+    flags must not, or editing them would regenerate (and re-bill) every cached line."""
+    prov = voice.get("provider")
+    s = cfg["voice"].get(prov, {}) or {}
+    keep = {
+        "elevenlabs": ("model_id", "model", "voice_settings", "output_format"),
+        "openai": ("model", "instructions"),
+        "openrouter": ("model", "response_format"),
+        "inworld": ("model_id", "audio_encoding"),
+    }.get(prov, ())
+    out = {k: s[k] for k in keep if k in s}
+    for k in ("rate", "volume"):
+        if k in voice:
+            out[k] = voice[k]
+    return out
+
+
+def _line_ident(cfg: dict, voice: dict, text: str) -> str:
+    return sha1_text(voice["provider"], voice.get("voice_id", voice.get("voice")), voice.get("model_id"),
+                     json.dumps(_cache_settings(cfg, voice), sort_keys=True, default=str), text)
+
+
 # ------------------------------- main entry --------------------------------
-def preflight(cfg: dict, key: str, segments: list[dict]) -> dict:
+def preflight(cfg: dict, key: str, segments: list[dict], cache_dir: Path | None = None) -> dict:
     """Check credits/licence before spending anything. Returns info used for attribution."""
     _, voice = resolve_voice(cfg, key)
     info = {"provider": voice["provider"], "attribution": None, "warnings": []}
-    chars = sum(len(segment["text"]) for segment in segments)
+    chars_all = sum(len(segment["text"]) for segment in segments)
+    chars = chars_all
+    if cache_dir is not None and voice["provider"] != "mock":
+        # lines already voiced are reused from the cache and cost nothing, so they do not count against a budget
+        tdir = Path(cache_dir) / "tts"
+        chars = sum(len(sg["text"]) for sg in segments if not (tdir / (_line_ident(cfg, voice, sg["text"]) + ".mp3")).exists())
 
     if voice["provider"] == "elevenlabs":
         subscription = eleven_subscription()
@@ -613,13 +642,7 @@ def synthesize_all(
     fallback_used = []          # (segment number, provider, voice) for every line read by a different voice
 
     for i, segment in enumerate(segments):
-        ident = sha1_text(
-            voice["provider"],
-            voice.get("voice_id", voice.get("voice")),
-            voice.get("model_id"),
-            cfg["voice"].get(voice["provider"], {}),
-            segment["text"],
-        )
+        ident = _line_ident(cfg, voice, segment["text"])
 
         extension = ".wav" if voice["provider"] == "mock" else ".mp3"
         raw = tdir / (ident + extension)
@@ -668,6 +691,14 @@ def synthesize_all(
                             continue
                         fallback_temp = temp_raw.with_name(temp_raw.stem + f".{provider_name}" + temp_raw.suffix)
                         fallback_temp.unlink(missing_ok=True)
+                        cached_fb = tdir / (_line_ident(cfg, {**candidate, "provider": provider_name}, segment["text"]) + extension)
+                        if cached_fb.exists() and _is_valid_audio(cached_fb):
+                            # this backup line was already generated on an earlier run: reuse it, do not pay again
+                            shutil.copyfile(cached_fb, fallback_temp)
+                            fallback_temp.replace(temp_raw)
+                            fallback_error = None
+                            used_fallback = (provider_name, fallback_voice_key, candidate)
+                            break
                         try:
                             log(f"  primary {voice['provider']} failed; trying approved fallback {provider_name}")
                             PROVIDERS[provider_name](cfg, candidate, segment["text"], fallback_temp, previous, following)
@@ -700,8 +731,7 @@ def synthesize_all(
                     # Audio from a DIFFERENT voice must never be stored under the primary voice's cache key, or every
                     # later run would keep reusing it as if it were the chosen voice. Store it under its own key.
                     prov, fb_key, fb_voice = used_fallback
-                    fb_ident = sha1_text(prov, fb_voice.get("voice_id", fb_voice.get("voice")),
-                                         fb_voice.get("model_id"), cfg["voice"].get(prov, {}), segment["text"])
+                    fb_ident = _line_ident(cfg, {**fb_voice, "provider": prov}, segment["text"])
                     raw = tdir / (fb_ident + extension)
                     ident = fb_ident
                     fallback_used.append((i + 1, prov, fb_key))

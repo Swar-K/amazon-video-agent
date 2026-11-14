@@ -9,7 +9,7 @@ import yaml
 
 from .common import ROOT, load_yaml_strict
 
-ASIN_RE = re.compile(r"^[A-Z0-9][A-Z0-9_-]{2,39}$")   # a product ASIN, or the name of a comparison folder
+ASIN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,39}$")   # a product ASIN, or the name of a comparison folder
 AMAZON_LINK_RE = re.compile(
     r"^https://((www\.)?amazon\.[a-z.]{2,6}/|amzn\.(to|eu|asia)/|a\.co/|link\.amazon/)", re.I
 )
@@ -45,9 +45,8 @@ def read_yaml(path: Path) -> dict:
             shown = lines[mark.line].strip() if mark.line < len(lines) else ""
             where = f" (line {mark.line + 1}: {shown[:100]!r})"
         problem = getattr(e, "problem", None) or "the layout is not valid YAML"
-        if "appears twice" in problem:
-            raise SystemExit(
-                f"{rel} has a duplicate key{where}: {problem}. Merge the two entries into one; ")
+        if "appears twice" in str(problem):
+            problem += ". Merge the two into one list (the second would silently replace the first)"
         # "could not find expected ':'" is reported on the line AFTER the real mistake. The line where the broken
         # entry starts (usually a list line missing its leading "- ") is the one to fix, so point at it too.
         cm = getattr(e, "context_mark", None)
@@ -172,9 +171,12 @@ def _load_compare(asin: str, pdir: Path, cfile: Path) -> "Project":
 
 
 def load_project(asin: str, require_facts: bool = True) -> Project:
-    asin = asin.strip().upper()
+    asin = asin.strip()
     if not ASIN_RE.match(asin):
         raise SystemExit(f"'{asin}' is not a valid project name (3-40 letters, digits, - or _).")
+    # keep the folder's own case (Linux is case-sensitive); fall back to upper case for an ASIN typed in lower case
+    if not (ROOT / "projects" / asin).exists() and (ROOT / "projects" / asin.upper()).exists():
+        asin = asin.upper()
     pdir = ROOT / "projects" / asin
     if not pdir.exists():
         raise SystemExit(f"Folder projects/{asin}/ not found. Copy projects/_template/ to projects/{asin}/ first.")
@@ -282,7 +284,7 @@ POLICY_RULES = [
     (r"\b(on sale|discounts?|coupons?|limited[- ]time|\d+\s?% off|percent off|price drop|lowest price|cheapest|free shipping|prime day|black friday|cyber monday)\b|\b(great|good|best|amazing|hot)\s+deals?\b", "uses price/promotion language"),
     (r"\b(walmart|target|best buy|ebay|aliexpress|temu|etsy)\b", "names another retailer"),
     (r"\b(cures?|heals?|clinically proven|medically proven|fda[- ]approved)\b", "makes a health claim"),
-    (r"\bhands?[- ]on\s+notes\b|\bthe\s+notes\b|\bthe\s+facts\b", "mentions internal research notes/facts instead of natural narration"),
+    (r"\bhands[- ]on notes\b|\bthe (hands[- ]on )?notes (say|says|mention|mentions|show|shows)\b|\bthe facts (say|says|mention|mentions|show|shows)\b", "reads the internal notes aloud (say 'in my use' or 'the brand says')"),
 ]
 STYLE_RULES = [
     (r"\b(cheap|cheaper|cheapest|affordable|budget|pricey|expensive|bargain)\b", "price wording: prices change and are not allowed to be quoted, so avoid describing price level"),

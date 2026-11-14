@@ -177,7 +177,7 @@ def run_render(args, cfg, project, entries, warns, script):
 
     voice_key, _ = V.resolve_voice(cfg, args.voice)
     log(f"Voice: {voice_key}")
-    vinfo = V.preflight(cfg, voice_key, segs)
+    vinfo = V.preflight(cfg, voice_key, segs, cache_dir=project.cache_dir)
     warns = list(warns) + vinfo["warnings"]
     for w in vinfo["warnings"]:
         log(f"  NOTE: {w}")
