@@ -186,6 +186,8 @@ print("  unsupported lines are removed (and listed) instead of left in the scrip
 # ---- 7. never read the notes aloud
 pol, _ = check_text("Hands-on notes mention the heavy-duty film is sturdy.")
 assert pol and "notes" in pol[0]
+for forbidden in ("Hands on notes mention the product.", "The notes say it fits.", "The facts show it fits."):
+    assert check_text(forbidden)[0], forbidden
 assert check_text("In my use the film stayed tight, and the brand says it is heavy duty.")[0] == []
 for sysmsg in (S.SYSTEM, S.COMPARE_SYSTEM, S.LIST_SYSTEM):
     assert "NEVER say 'hands-on notes'" in sysmsg
@@ -196,7 +198,9 @@ wf = yaml.safe_load(open(Path(__file__).resolve().parent.parent / ".github/workf
 steps = wf["jobs"]["build"]["steps"]
 rest = next(x for x in steps if str(x.get("uses", "")).startswith("actions/cache/restore"))
 save = next(x for x in steps if str(x.get("uses", "")).startswith("actions/cache/save"))
-assert rest["with"]["path"] == "projects/*/.cache" and save["with"]["path"] == "projects/*/.cache" and save["if"] == "always()"
+expected_cache_paths = "projects/*/.cache\n.adagent_state/tts_usage.json"
+assert rest["with"]["path"].strip() == expected_cache_paths
+assert save["with"]["path"].strip() == expected_cache_paths and save["if"] == "always()"
 assert [x.get("name") for x in steps].index(save["name"]) > [x.get("name") or x.get("uses") for x in steps].index("Run")
 print("OK - limits & CTA: daily-limit stop, saved/resumed photo checks, vision switch, subscribe/like/share, line placement, removal, no notes aloud, workflow caches")
 
