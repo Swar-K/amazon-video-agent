@@ -100,7 +100,8 @@ jobs:
           ASIN="${ASIN#projects/}"; ASIN="${ASIN%/}"                                              # allow "projects/NAME/"
           echo "Project name received: [$ASIN]"
           [[ "$ASIN" =~ ^[A-Za-z0-9][A-Za-z0-9_-]{2,39}$ ]] || { echo "Project name [$ASIN] is not valid: use 3-40 letters, digits, - or _ (no spaces, slashes, dots or commas), exactly like the folder name under projects/"; exit 1; }
-          ASIN=$(echo "$ASIN" | tr a-z A-Z)
+          # keep the case you typed (Linux folders are case-sensitive); fall back to upper case for ASINs typed in lower case
+          if [ ! -d "projects/$ASIN" ]; then UP=$(echo "$ASIN" | tr a-z A-Z); if [ -d "projects/$UP" ]; then ASIN="$UP"; fi; fi
           echo "ASIN=$ASIN" >> "$GITHUB_ENV"
           [ -d "projects/$ASIN" ] || { echo "Folder projects/$ASIN not found. Check the spelling against the folders in your repo."; exit 1; }
 
@@ -165,6 +166,20 @@ jobs:
             .adagent_state/tts_usage.json
           key: adagent-cache-${{ github.run_id }}
 
+      - name: Check the video files are not damaged
+        if: always()
+        run: |
+          # a half-written silent video from a failed run must never be uploaded
+          rm -f "projects/$ASIN/out/_video_only.mp4"
+          for f in projects/"$ASIN"/out/*.mp4; do
+            [ -e "$f" ] || continue
+            if ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" >/dev/null 2>&1; then
+              echo "OK $(du -h "$f" | cut -f1)  $f"
+            else
+              echo "::error::$f is damaged, removing it so you do not download a broken file"; rm -f "$f"
+            fi
+          done
+
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
@@ -176,6 +191,7 @@ jobs:
             projects/${{ env.ASIN }}/out/*.txt
             projects/${{ env.ASIN }}/out/*.md
             run.log
+          compression-level: 0       # mp4 is already compressed; storing it as-is makes the zip faster and easier to open
           retention-days: 3          # short on purpose: the free plan has only 500 MB of artifact storage, download your video soon
           if-no-files-found: ignore
 
@@ -202,7 +218,10 @@ jobs:
             if [ -f /tmp/keep/scenes.md ]; then cp /tmp/keep/scenes.md "projects/$ASIN/scenes.md"; fi
             mkdir -p scripts_archive && cp -r /tmp/keep/scripts_archive/. scripts_archive/ 2>/dev/null || true
             if [ -f /tmp/keep/.adagent_state/tts_usage.json ]; then mkdir -p .adagent_state && cp /tmp/keep/.adagent_state/tts_usage.json .adagent_state/tts_usage.json; fi
-            git add "projects/$ASIN/script.md" "projects/$ASIN/scenes.md" scripts_archive .adagent_state/tts_usage.json 2>/dev/null || true
+            # add each path only if it exists: one missing path makes git abort the whole add
+            for f in "projects/$ASIN/script.md" "projects/$ASIN/scenes.md" scripts_archive .adagent_state/tts_usage.json; do
+              if [ -e "$f" ]; then git add -- "$f"; fi
+            done
             if git diff --cached --quiet; then echo "nothing to save"; exit 0; fi
             git commit -qm "script/history for $ASIN"
             if git push -q origin HEAD:main; then echo "saved"; exit 0; fi
