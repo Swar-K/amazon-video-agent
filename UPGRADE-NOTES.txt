@@ -28,3 +28,14 @@ WHAT WAS NEW BEFORE
 - keywords: in facts.yaml / compare.yaml / list.yaml.
 - AI ad-clip scenes: product-photo scenes first, commercial look (notebook is untested on a real GPU).
 - Disclosure placement: config.yaml disclosure: mode (shipped: description_only). title.txt / description.txt / pinned_comment.txt every run.
+
+BUG-FIX PASS (Nov 14)
+- make-video.yml: the "Save script" step now adds each file only if it exists (one missing file used to make git save nothing).
+- Deleted .github/workflows/config.yaml: GitHub read it as a broken workflow. Only make-video.yml and clean-artifacts.yml belong there.
+- Voice cache key now ignores budgets/flags/paths, so editing them no longer regenerates (and re-bills) every line. NOTE: the first run after this
+  update re-voices lines once, because the key format changed.
+- A backup-voice (fallback) line that was already generated is reused instead of billed again; preflight does not count cached lines.
+- Project folder names keep their case (lowercase comparison folders work); an ASIN typed in lower case still falls back to upper case.
+- 'hands-on notes' / 'the notes say' spoken aloud is flagged again (policy rule restored).
+- facts.yaml / compare.yaml / list.yaml: a key written twice is reported again (it used to silently drop the first copy).
+- tests: workflow cache-path assertion updated.
