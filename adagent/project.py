@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from .common import ROOT
+from .common import ROOT, load_yaml_strict
 
 ASIN_RE = re.compile(r"^[A-Z0-9][A-Z0-9_-]{2,39}$")   # a product ASIN, or the name of a comparison folder
 AMAZON_LINK_RE = re.compile(
@@ -36,7 +36,7 @@ def read_yaml(path: Path) -> dict:
     text = "\n".join(l for l in raw.splitlines() if not FENCE_RE.match(l))
     rel = f"projects/{path.parent.name}/{path.name}"
     try:
-        data = yaml.safe_load(text)
+        data = load_yaml_strict(text)
     except yaml.YAMLError as e:
         mark = getattr(e, "problem_mark", None)
         lines = text.splitlines()
@@ -45,6 +45,9 @@ def read_yaml(path: Path) -> dict:
             shown = lines[mark.line].strip() if mark.line < len(lines) else ""
             where = f" (line {mark.line + 1}: {shown[:100]!r})"
         problem = getattr(e, "problem", None) or "the layout is not valid YAML"
+        if "appears twice" in problem:
+            raise SystemExit(
+                f"{rel} has a duplicate key{where}: {problem}. Merge the two entries into one; ")
         # "could not find expected ':'" is reported on the line AFTER the real mistake. The line where the broken
         # entry starts (usually a list line missing its leading "- ") is the one to fix, so point at it too.
         cm = getattr(e, "context_mark", None)
@@ -279,6 +282,7 @@ POLICY_RULES = [
     (r"\b(on sale|discounts?|coupons?|limited[- ]time|\d+\s?% off|percent off|price drop|lowest price|cheapest|free shipping|prime day|black friday|cyber monday)\b|\b(great|good|best|amazing|hot)\s+deals?\b", "uses price/promotion language"),
     (r"\b(walmart|target|best buy|ebay|aliexpress|temu|etsy)\b", "names another retailer"),
     (r"\b(cures?|heals?|clinically proven|medically proven|fda[- ]approved)\b", "makes a health claim"),
+    (r"\bhands?[- ]on\s+notes\b|\bthe\s+notes\b|\bthe\s+facts\b", "mentions internal research notes/facts instead of natural narration"),
 ]
 STYLE_RULES = [
     (r"\b(cheap|cheaper|cheapest|affordable|budget|pricey|expensive|bargain)\b", "price wording: prices change and are not allowed to be quoted, so avoid describing price level"),
