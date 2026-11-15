@@ -1,0 +1,14 @@
+# SCENES for B010A5J5FU  (AI-generated clips, about 5 seconds each)
+# Next: run notebooks/make_ai_clips.ipynb on a free GPU (Kaggle or Colab). It writes ai_s01.mp4 ... into assets/.
+# Edit prompts freely. Keep every scene faceless and free of product-performance claims. Delete a line to skip a scene.
+# Format:  [id] type: mood|product | ref: none|photo file name | prompt: ...
+
+[s01] type: product | ref: product_image_01.jpg | prompt: A sleek grey dryer unit sits on a wooden workbench, soft morning light spilling across its vertical fins. Camera drifts slowly from left to right, highlighting the orange control dial. Quiet, purposeful atmosphere suggests a reliable tool for the workshop.
+[s02] type: product | ref: product_image_11.jpg | prompt: The portable dryer rests on a concrete floor, four vertical tubes gleaming under warm ambient light. A gentle push‑in reveals the orange panel and dial, while a subtle dust particle drift adds a calm, industrious mood.
+[s03] type: product | ref: product_image_31.jpg | prompt: A white‑backlit scene shows the grey boot dryer with its central blower and two extension tubes. A slow orbit circles the unit, rim light tracing its edges, while soft bokeh glows in the background, evoking a clean, efficient workspace.
+[s04] type: product | ref: product_image_41.jpg | prompt: The dryer displays blue shoe soles and black gloves attached, illuminated by a soft side light. Camera tilts upward, sweeping across the orange control panel, while a faint dust swirl adds a quiet, purposeful feel.
+[s05] type: product | ref: product_image_61.jpg | prompt: Black hiking boots and gloves hang from the dryer on a plain white surface. A slow dolly pushes in, catching the subtle gleam of the control dial, while a warm glow from a nearby window creates a calm, ready‑for‑use mood.
+[s06] type: product | ref: product_image_71.jpg | prompt: Close‑up of the silver rotary fan grille and vertical vents, backlit by a soft rim light. Camera pushes gently toward the grille, revealing the precise engineering, while a faint breeze of light particles moves across the surface, suggesting quiet performance.
+[s07] type: mood | ref: none | prompt: Gloves and a beanie rest on a pine‑scented log bench near a snow‑covered cabin doorway. Gentle daylight filters through frosted windows, and the camera drifts slowly across the scene, evoking cozy after‑ski comfort.
+[s08] type: mood | ref: none | prompt: A rugged workbench in a garage, tools scattered, with a pair of steel‑toed work boots placed beside a hanging lantern. Soft amber light washes the space as the camera pushes in, highlighting the anticipation of a fresh start.
+[s09] type: mood | ref: none | prompt: A snowy mountain ridge at dawn, a lone silhouette of a hunter crouching with gear slung over shoulders. The camera tilts down to reveal boots poised on a rock, bathed in pale light, suggesting readiness for the day ahead.
