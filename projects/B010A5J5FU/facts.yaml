@@ -1,1 +1,171 @@
+# ------------------------------------------------------------------
+# Copy this whole folder to projects/<ASIN>/ and fill it in.
+# The script writer may ONLY use what is written here. Anything you
+# leave out will simply not be said. More real facts = better video.
+# ------------------------------------------------------------------
+asin: B010A5J5FU
+product_name: "DryGuy Shoe, Boot, Garment & Gear Electric Dryer"
+brand: "DryGuy"
+short_name: "DryGuy Force Dry DX"
+category: "Outdoor Recreation"
+audience: "Workers, hikers, hunters, skiers, and outdoor enthusiasts who want to dry multiple pairs of footwear, gloves, or compatible gear using a quiet forced-air dryer."
 
+# Your Amazon affiliate link (SiteStripe short link amzn.to/xxxx, or an amazon.* link with your tag=).
+# Third-party link shorteners / cloakers are not allowed in Associates.
+affiliate_url: "https://link.amazon/B08ot48mT"
+
+# What the brand/listing SAYS (the video will attribute these: "the brand says ...").
+# Type them yourself in your own words. Do not paste customer reviews, prices or star ratings.
+manufacturer_claims:
+  - "Designed to dry shoes, boots, garments, gloves, and compatible outdoor gear."
+  - "Uses a central forced-air blower to circulate air through four drying ports."
+  - "Combines forced airflow with gentle convection heating."
+  - "The manufacturer describes the rotary blower as whisper-quiet."
+  - "Offers a Heat/No Heat switch for different drying needs."
+  - "The manufacturer advertises drying times of approximately 1–3 hours, depending on the items and conditions."
+  - "Designed to dry up to two pairs of footwear simultaneously, or one pair of footwear and one pair of gloves."
+  - "Includes a three-hour automatic shutoff timer."
+  - "Includes two removable extension tubes for taller boots."
+  - "Compatible accessories are available for drying additional types of gear, including waders and helmets."
+  - "The manufacturer lists a one-year warranty; terms and conditions apply."
+
+# Hard specs you can verify on the product / box / brand site.
+specs:
+  - "Product: DryGuy Force Dry DX Shoe, Boot, Garment & Gear Electric Dryer."
+  - "ASIN: B010A5J5FU."
+  - "Brand: DryGuy."
+  - "Model number: 2129."
+  - "Manufacturer part number: 02129."
+  - "Drying capacity: four drying ports."
+  - "Drying method: central forced-air blower with gentle heat."
+  - "Heat settings: Heat and No Heat."
+  - "Timer: up to three hours with automatic shutoff."
+  - "The package includes the main dryer unit, four drying ports, and two removable extension tubes."
+  - "The manufacturer advertises approximate drying times of 1–3 hours."
+  - "The manufacturer describes the rotary blower as whisper-quiet."
+  - "The manufacturer lists a one-year warranty."
+  - "The product body is listed as plastic."
+  - "The listed power cord length is six feet."
+  - "Actual drying time depends on the moisture level, footwear size, material, airflow, and surrounding conditions."
+
+# YOUR OWN observations from actually handling the product. This is what makes the video
+# yours (and keeps it clear of YouTube's 'inauthentic content' rules). Aim for 6+ lines.
+hands_on_notes:
+  - "These are practical observations based on the supplied product information, not firsthand testing."
+  - "The four-port design gives this dryer an advantage for households or users who regularly need to dry several items at once."
+  - "The manufacturer describes a capacity of up to two pairs of footwear, or one pair of footwear and one pair of gloves."
+  - "The central blower actively circulates air through the ports, making this a forced-air dryer rather than a fan-free convection-only model."
+  - "The Heat/No Heat switch gives buyers an option to use airflow without added heat for items that may require more cautious drying."
+  - "The three-hour automatic shutoff timer provides a defined operating cycle."
+  - "The two removable extension tubes may help accommodate taller boots."
+  - "The whisper-quiet blower claim makes noise level a useful comparison point, but the product should not be described as completely silent."
+  - "The advertised 1–3-hour drying time is an approximate manufacturer claim, not a guarantee for every wet boot or garment."
+  - "Buyers should check the care instructions for their footwear and gear before choosing the heated setting."
+  - "This product is designed for more than footwear, which may make it useful for compatible gloves and outdoor gear."
+  - "Do not describe these notes as personal testing unless the product has actually been handled and tested."
+
+pros:
+  - "Four drying ports for multiple items."
+  - "Designed to dry up to two pairs of footwear simultaneously, or one pair of footwear and one pair of gloves."
+  - "Central forced-air blower circulates air through the drying ports."
+  - "Heat/No Heat switch provides two drying options."
+  - "Manufacturer-advertised drying time of approximately 1–3 hours."
+  - "Three-hour automatic shutoff timer."
+  - "Two removable extension tubes for taller boots."
+  - "Whisper-quiet blower according to the manufacturer."
+  - "Designed for footwear, gloves, garments, and compatible outdoor gear."
+  - "Manufacturer-listed one-year warranty."
+
+cons:
+  - "Uses a blower, so it is not a fan-free or no-fan dryer."
+  - "Whisper-quiet does not mean completely silent."
+  - "The three-hour timer limits a single operating cycle."
+  - "The advertised 1–3-hour drying time is not guaranteed for every item."
+  - "The four-port setup requires sufficient space for the unit and the items being dried."
+  - "The heated setting may not be suitable for every footwear or garment material."
+  - "The one-year warranty is subject to its terms and conditions."
+  - "Additional compatible accessories for specialized gear may need to be purchased separately."
+
+not_for:
+  - "People specifically looking for a completely silent, fan-free, or no-fan dryer."
+  - "Anyone who needs a dryer with no moving parts."
+  - "People who need a guaranteed drying time for every type of wet footwear."
+  - "Anyone who needs a timer longer than three hours in a single cycle."
+  - "People who need to dry more items than the four-port configuration can accommodate."
+  - "Anyone who wants a portable battery-powered dryer."
+  - "People who cannot provide enough space for the unit and drying items."
+  - "Anyone expecting guaranteed odor elimination, sanitization, or disinfection."
+
+# Optional extras
+use_cases:
+  - "work boot drying"
+  - "drying damp work boots after shifts"
+  - "hunting boot drying"
+  - "ski boot drying"
+  - "shoe and footwear drying"
+  - "drying gloves and compatible garments"
+  - "drying outdoor and sports gear"
+  - "drying multiple pairs of footwear"
+  - "warming footwear with the heated setting"
+  - "forced-air footwear drying"
+  - "drying compatible taller boots with extension tubes"
+
+notes: |
+  SEO keywords:
+  - "work boots dryer"
+  - "electric shoe dryer"
+  - "dry work boots"
+  - "boot warmer"
+  - "hunting boot dryer"
+  - "ski boot dryer"
+  - "footwear dryer"
+  - "PEET boot dryer"
+  - "silent boot dryer"
+  - "shoe dryer"
+  - "energy boot dryer"
+  - "leather boots dryer"
+  - "safe boot dryer"
+  - "convection vs forced"
+  - "no fan dryer"
+
+  Keyword usage guidance:
+  - Use "work boots dryer" and "work boot dryer" naturally when
+    discussing drying work footwear after long or wet shifts.
+  - Use "electric shoe dryer," "shoe dryer," and "footwear dryer"
+    when describing the product's broader purpose.
+  - Use "hunting boot dryer" and "ski boot dryer" only in relevant
+    outdoor footwear contexts.
+  - Use "boot warmer" when discussing the heated setting.
+  - Use "PEET boot dryer" only in a genuine brand comparison.
+    Do not imply this product is made by PEET.
+  - Do not target "silent boot dryer" as a literal product description.
+    The manufacturer describes the blower as whisper-quiet, but the
+    unit has a fan and is not completely silent.
+  - Use "no fan dryer" only when explaining how this product differs
+    from fan-free convection dryers. Do not describe the DryGuy as
+    a no-fan dryer.
+  - Use "convection vs forced" to explain the distinction between
+    natural convection-only dryers and forced-air dryers. This
+    DryGuy model uses a central forced-air blower with gentle heat.
+  - Use "energy boot dryer" carefully. Do not invent wattage,
+    electricity consumption, or guaranteed energy savings.
+  - Use "leather boots dryer" and "safe boot dryer" cautiously.
+    Do not claim universal material compatibility or guaranteed
+    protection against footwear damage.
+  - Explain the four-port configuration and the manufacturer's
+    stated capacity of up to two pairs of footwear, or one pair
+    of footwear and one pair of gloves.
+  - Explain the Heat/No Heat switch and three-hour automatic
+    shutoff timer.
+  - Describe the 1–3-hour drying time as an approximate
+    manufacturer claim, not a guaranteed result.
+  - Do not claim that the product kills bacteria, eliminates fungi,
+    sanitizes, disinfects, or completely removes odors.
+  - Do not describe the blower as completely silent or fanless.
+  - Do not invent firsthand testing, customer feedback, prices,
+    ratings, or sales figures.
+  - Recheck the current Amazon listing before using price, rating,
+    review count, included accessories, or availability in content.
+
+# angle: quiet_four_port_forced_air_boot_shoe_and_gear_dryer
+# assets_allow: []
