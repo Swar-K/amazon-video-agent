@@ -1,4 +1,4 @@
-# TITLE: DryGuy Electric Shoe Dryer Review for Work Boots and Outdoor Gear
+# TITLE: DryGuy Electric safe boot dryer Review for Work Boots and Outdoor Gear
 # INTRO: A day-in-the-life look at the DryGuy shoe, boot, garment & gear dryer. See how it handles work boots, hunting boots, ski boots and gloves in real use.
 # TAGS: DryGuy, work boots dryer, electric shoe dryer, hunting boot dryer, ski boot dryer, boot warmer, footwear dryer, forced air dryer, outdoor gear drying, boot dryer review
 # ANGLE: day_in_the_life
@@ -12,6 +12,7 @@
 ## hook
 [1] I just pulled my boots off after a six-hour shift, and they're still dripping. | assets: A06 | p: 1
 [2] The DryGuy dryer sits on the floor, humming softly while the air circulates. | assets: A04 | p: 1
+[I1] Please subscribe to our channel if you haven't yet. Let's get started with the Alien Draft kit for Windows and Doors. | p: 1
 
 ## context
 [3] For anyone who spends long days in wet work boots or hunting boots, drying time can be a daily hassle. | p: 2
@@ -48,7 +49,7 @@
 [x9] The three-hour timer means longer drying cycles require a manual restart, which may be inconvenient for very wet gear. | assets: A17 | p: 2
 
 ## who_for
-[17] If you’re a worker needing a reliable work boots dryer after wet shifts, this unit fits your routine. | p: 2
+[17] If you’re a worker needing a safe boot dryer after wet shifts, this unit fits your routine. | p: 2
 [18] Hunters, skiers, and hikers who own multiple boots or gloves will appreciate the four-port layout. | p: 2
 
 ## who_skip
@@ -57,7 +58,12 @@
 
 ## verdict
 [21] Overall, the DryGuy dryer delivers consistent forced-air drying for work boots, hunting boots, ski boots and gloves, with a quiet enough operation for most indoor spaces. | assets: A09 | p: 1
-[22] Its heat option acts like a boot warmer, while the No Heat mode keeps delicate garments safe, making it a versatile electric shoe dryer. | assets: A14 | p: 1
+[22] Its heat option acts like a boot warmer, while the No Heat mode keeps delicate garments safe, making it a versatile electric safe boot dryer. | assets: A14 | p: 1
+
+## outro
+[O1] If you liked this video, give it a like and subscribe to the channel. In the comments, tell me if you liked the DryGuy Electric safe boot dryer. | p: 1
+[O2] I've put the product links in the video description below. | p: 1
+[O3] Thank you very much for watching the whole video. Hope to see you in the next video. Take care. | p: 1
 
 <!-- REVIEW NOTES (ignored when rendering)
 estimated length: 4.4 min; similarity to earlier scripts: 0.005
