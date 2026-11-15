@@ -12,7 +12,7 @@
 ## hook
 [1] I just pulled my boots off after a six-hour shift, and they're still dripping. | assets: A06 | p: 1
 [2] The DryGuy dryer sits on the floor, humming softly while the air circulates. | assets: A04 | p: 1
-[I1] Please subscribe to our channel if you haven't yet. Let's get started with the Alien Draft kit for Windows and Doors. | p: 1
+[I1] Please subscribe to our channel if you haven't yet. Let's get started with the DryGuy Electric Dryer for Garments, Gloves and shoes. | p: 1
 
 ## context
 [3] For anyone who spends long days in wet work boots or hunting boots, drying time can be a daily hassle. | p: 2
@@ -21,8 +21,8 @@
 [4] The DryGuy Force Dry DX is a four-port forced-air dryer with a whisper-quiet rotary blower, according to the brand. | assets: A14 | p: 1
 
 ## features
-[5] Each port can hold a shoe, boot, glove or compatible gear, letting you dry up to two pairs of footwear at once. | callout: four ports | assets: A09 | p: 1
-[6] The Heat/No Heat switch lets you add gentle convection heat or just circulate air for delicate items. | assets: A05 | p: 2
+[5] Each port can hold a shoe, boot, glove or compatible gear, letting you dry up to two pairs of footwear at once. | callout: four ports | assets: A20,A21 | p: 1
+[6] The Heat/No Heat switch lets you add gentle convection heat or just circulate air for delicate items. | assets: A21 | p: 1
 [7] A three-hour automatic shutoff timer defines the cycle, preventing over-drying. | assets: A05 | p: 2
 [8] Two removable extension tubes accommodate taller boots, like ski boots or heavy hunting boots. | assets: A23 | p: 2
 [x1] The dryer’s plastic housing keeps the unit lightweight, making it easy to move between garage shelves or a workshop bench. | assets: A04 | p: 2
