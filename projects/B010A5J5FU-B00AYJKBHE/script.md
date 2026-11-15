@@ -53,7 +53,7 @@
 [x20] When setting up the JobSite dryer, be sure to leave at least eight inches of space above the boots so warm air can circulate properly. | product: 2 | assets: P2-A13 | p: 2
 
 ## head_to_head
-[16] Both dryers are electric and target outdoor workers and hikers. | assets: P1-A23,P2-A12 | p: 1
+[16] Both dryers are electric and useful for outdoor workers and hikers. | assets: P1-A23,P2-A12 | p: 1
 [17] DryGuy uses forced airflow; JobSite relies on passive convection. | assets: P1-A28,P2-A06 | p: 1
 [18] DryGuy can handle multiple items at once, while JobSite dries only one pair per cycle. | assets: P1-A09,P2-A09 | p: 1
 [19] DryGuy advertises 1-3 hour drying; JobSite recommends 8-12 hours, so speed differs markedly. | assets: P1-A14,P2-A03 | p: 1
