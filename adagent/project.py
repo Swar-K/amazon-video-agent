@@ -10,8 +10,54 @@ import yaml
 from .common import ROOT, load_yaml_strict
 
 ASIN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,39}$")   # a product ASIN, or the name of a comparison folder
+ALIEXPRESS_LINK_RE = re.compile(r"^https?://([a-z0-9-]+\.)*aliexpress\.[a-z.]{2,6}/", re.I)
+STORE_NAMES = {"amazon": "Amazon", "aliexpress": "AliExpress"}
+
+
+def store_of(facts: dict) -> str:
+    """'amazon' or 'aliexpress': facts.yaml  store:  if given, else detected from affiliate_url (default amazon)."""
+    s = str(facts.get("store") or "").strip().lower()
+    if s in STORE_NAMES:
+        return s
+    return "aliexpress" if ALIEXPRESS_LINK_RE.match(str(facts.get("affiliate_url") or "")) else "amazon"
+
+
+def stores_of(project) -> set:
+    subs = project.compare["products"] if project.compare else [project]
+    return {store_of(x.facts) for x in subs}
+
+
+def store_name(store: str) -> str:
+    return STORE_NAMES.get(store, store.title())
+
+
+def apply_disclosure(cfg: dict, project) -> set:
+    """The Amazon Associates sentence is used ONLY when an Amazon product is in the video; AliExpress-only videos get a general
+    affiliate disclosure; mixed videos get both. Sets the texts that the script, overlay and description use."""
+    d, st = cfg["disclosure"], stores_of(project)
+    if st == {"amazon"}:
+        d["description_line"] = d["on_screen"] + " This description and video contain affiliate links."
+    elif "amazon" not in st:
+        d["on_screen"] = d.get("on_screen_generic", d["on_screen"])
+        d["spoken"] = d.get("spoken_generic", d["spoken"])
+        d["description_line"] = d["on_screen"]
+    else:
+        d["on_screen"] = d.get("on_screen_mixed", d["on_screen"])
+        d["spoken"] = d.get("spoken_mixed", d["spoken"])
+        d["description_line"] = d["on_screen"] + " This description and video contain affiliate links."
+    return st
+
+
+def strip_allowed_stores(text: str, allow=()) -> str:
+    """Naming a store that is part of THIS video (for example 'the AliExpress one') is fine; remove it before the retailer rule runs."""
+    for st in allow:
+        if st != "amazon":
+            text = re.sub(r"\bali\s?express\b" if st == "aliexpress" else re.escape(store_name(st)), " ", text, flags=re.I)
+    return text
+
+
 AMAZON_LINK_RE = re.compile(
-    r"^https://((www\.)?amazon\.[a-z.]{2,6}/|amzn\.(to|eu|asia)/|a\.co/|link\.amazon/)", re.I
+    r"^https://((www\.)?amazon\.[a-z.]{2,6}/|amzn\.(to|eu|asia)/|a\.co/)", re.I
 )
 
 
@@ -45,15 +91,22 @@ def read_yaml(path: Path) -> dict:
             shown = lines[mark.line].strip() if mark.line < len(lines) else ""
             where = f" (line {mark.line + 1}: {shown[:100]!r})"
         problem = getattr(e, "problem", None) or "the layout is not valid YAML"
-        if "appears twice" in str(problem):
-            problem += ". Merge the two into one list (the second would silently replace the first)"
-        # "could not find expected ':'" is reported on the line AFTER the real mistake. The line where the broken
-        # entry starts (usually a list line missing its leading "- ") is the one to fix, so point at it too.
+        # YAML often notices a mistake only on the NEXT line; the context mark tells where the broken line really started
         cm = getattr(e, "context_mark", None)
-        if cm is not None and (mark is None or cm.line != mark.line) and cm.line < len(lines):
-            where += f" - the mistake is probably at line {cm.line + 1}: {lines[cm.line].strip()[:100]!r}"
+        hint = ""
+        if cm is not None and cm.line < len(lines) and "simple key" in (getattr(e, "context", "") or ""):
+            hint = (f"\nThe line that is probably wrong is line {cm.line + 1}: {lines[cm.line].strip()[:100]!r}. "
+                    "Inside a list every item must start with '- ' (a dash and a space), and every other line must look like  name: value.")
+        if mark is not None:
+            culprit = cm.line if cm is not None else -1
+            first = max(0, (cm.line if cm is not None else mark.line) - 2)
+            near = "\n".join(f"{'>' if i == culprit else ' '} {i + 1:>3} | {lines[i][:110]}" for i in range(first, min(len(lines), mark.line + 2)))
+            hint += f"\nLines around it ('>' marks the likely culprit):\n{near}"
+        if "appears twice" in problem:
+            raise SystemExit(f"{rel} has a formatting error{where}: {problem}.\n"
+                             "Merge the two into one (for example, put all the list items under a single 'hands_on_notes:'), then run again.")
         raise SystemExit(
-            f"{rel} has a formatting error{where}: {problem}.\n"
+            f"{rel} has a formatting error{where}: {problem}.{hint}\n"
             "Common causes: a quote mark inside quoted text (write 'inches' instead of \"), a colon inside unquoted text, "
             "mixing [a, b] lists with '- item' lines under the same key, tabs instead of spaces, or ```yaml lines pasted from chat.\n"
             "Fix that line on GitHub (pencil icon) and run again.")
@@ -218,13 +271,22 @@ def validate_facts(project: Project) -> tuple[list[str], list[str]]:
     if str(f.get("asin", "")).upper() != project.asin:
         errors.append(f"facts.yaml: asin must equal the folder name ({project.asin}).")
     url = str(f.get("affiliate_url", ""))
-    if url and not AMAZON_LINK_RE.match(url):
+    store = store_of(f)
+    if str(f.get("store") or "").strip().lower() not in ("", "amazon", "aliexpress"):
+        errors.append("facts.yaml: store must be  amazon  or  aliexpress  (or left out: it is detected from affiliate_url).")
+    elif url and store == "amazon" and not AMAZON_LINK_RE.match(url):
         errors.append(
-            "facts.yaml: affiliate_url must be an Amazon link (amazon.*, amzn.to, amzn.eu, a.co or link.amazon). "
-            "Third-party link shorteners/cloakers are not allowed in Associates."
+            "facts.yaml: affiliate_url must be an Amazon link (amazon.*, amzn.to, amzn.eu or a.co). "
+            "Third-party link shorteners/cloakers are not allowed in Associates. "
+            "For an AliExpress product add  store: aliexpress  and use your AliExpress affiliate link."
         )
-    if url and "amazon." in url and "tag=" not in url:
+    elif url and store == "aliexpress" and not ALIEXPRESS_LINK_RE.match(url):
+        errors.append("facts.yaml: store is aliexpress, so affiliate_url must be an AliExpress link (aliexpress.*, s.click.aliexpress.com or a.aliexpress.com).")
+    if url and store == "amazon" and "amazon." in url and "tag=" not in url:
         warnings.append("affiliate_url has no tag=YOURID-20 parameter, so it will not earn commission.")
+    if store == "aliexpress":
+        warnings.append("AliExpress listing photos and videos belong to the sellers: use your OWN photos and clips (for example from the parcel you "
+                        "received), never images saved from the listing. Prices, shipping times and order counts change constantly and are never used.")
     n = fact_count(f)
     if n < 8:
         warnings.append(
@@ -276,6 +338,10 @@ def _validate_compare(project: Project) -> tuple[list[str], list[str]]:
 # Hard rules on narration text (policy = must fix, style = warning)
 # ---------------------------------------------------------------------------
 POLICY_RULES = [
+    (r"\b(ships? (from|in|within)|delivery (in|within)|\d+\s?(days?|weeks?) (delivery|shipping)|shipping (time|speed)|free shipping|"
+     r"\d[\d,.]*\+?\s+(orders|sold)|orders? (sold|placed)|(store|seller) rating|top[- ]rated seller|(choice|best[- ]?seller) (badge|label))\b",
+     "shipping, seller or order-count claim (changes constantly)"),
+    (r"\bhands[- ]on notes?\b|\bthe notes (say|mention|state)\b|\baccording to (my|the) (notes|facts)\b", "refers to your notes/facts out loud (speak in the first person or say 'the brand says')"),
     (r"\$\s?\d|\b\d[\d,.]*\s?(usd|dollars?|bucks|euros?|pounds?)\b", "mentions a price"),
     (r"\b\d(\.\d)?\s*(out of 5|/5|stars?)\b|\bfive[- ]star\b|\bstar rating", "mentions a star rating"),
     (r"\b\d[\d,]*\s+(customer\s+)?(reviews|ratings)\b", "mentions a review/rating count"),
@@ -284,7 +350,6 @@ POLICY_RULES = [
     (r"\b(on sale|discounts?|coupons?|limited[- ]time|\d+\s?% off|percent off|price drop|lowest price|cheapest|free shipping|prime day|black friday|cyber monday)\b|\b(great|good|best|amazing|hot)\s+deals?\b", "uses price/promotion language"),
     (r"\b(walmart|target|best buy|ebay|aliexpress|temu|etsy)\b", "names another retailer"),
     (r"\b(cures?|heals?|clinically proven|medically proven|fda[- ]approved)\b", "makes a health claim"),
-    (r"\bhands[- ]on notes\b|\bthe (hands[- ]on )?notes (say|says|mention|mentions|show|shows)\b|\bthe facts (say|says|mention|mentions|show|shows)\b", "reads the internal notes aloud (say 'in my use' or 'the brand says')"),
 ]
 STYLE_RULES = [
     (r"\b(cheap|cheaper|cheapest|affordable|budget|pricey|expensive|bargain)\b", "price wording: prices change and are not allowed to be quoted, so avoid describing price level"),
@@ -295,7 +360,8 @@ STYLE_RULES = [
 ]
 
 
-def check_text(text: str) -> tuple[list[str], list[str]]:
+def check_text(text: str, allow_stores=()) -> tuple[list[str], list[str]]:
+    text = strip_allowed_stores(text, allow_stores)
     policy, style = [], []
     for pat, why in POLICY_RULES:
         if re.search(pat, text, re.I):

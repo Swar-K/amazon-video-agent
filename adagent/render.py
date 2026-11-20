@@ -295,8 +295,13 @@ def plan_shots(rows, total: float, entries: list[dict], project_assets: Path, cf
                 speed = 1.0 if e["duration"] >= need else max(0.6, e["duration"] / need)
                 room = max(0.0, e["duration"] - need * speed)
                 shot.speed = speed
-                shot.clip_in = (cursor[e["id"]] % (room + 0.01)) if room > 0.3 else 0.0
-                cursor[e["id"]] += need * speed + 0.7
+                wins = e.get("windows")
+                if wins and room > 0.3:           # the clip's best moments first (sharp, moving), moments earlier videos used last
+                    shot.clip_in = min(float(wins[view_count[e["id"]] % len(wins)]), room)
+                    view_count[e["id"]] += 1
+                else:
+                    shot.clip_in = (cursor[e["id"]] % (room + 0.01)) if room > 0.3 else 0.0
+                    cursor[e["id"]] += need * speed + 0.7
                 shot.move = dict(z=(1.0, 1.0 + 0.05 * rng.random()), c=((.5, .5), (.5, .5)))
             usage[e["id"]] += 1
             recent.append(e["id"])

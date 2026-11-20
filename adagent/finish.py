@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .common import fmt_ts, media_duration, run
-from .project import Project
+from .project import Project, store_name, store_of, stores_of
 from .timeline import Timeline, chapters
 
 AUDIO_EXT = {".mp3", ".wav", ".m4a", ".aac", ".ogg", ".flac"}
@@ -37,20 +37,25 @@ def write_description(project: Project, cfg: dict, script: dict, tl: Timeline, v
     """Writes title.txt, description.txt (disclosure on the first line) and pinned_comment.txt next to `path`."""
     f, d = project.facts, cfg["disclosure"]
     title = script.get("title") or f["product_name"]
-    disc = d["on_screen"] + " This description and video contain affiliate links."
+    disc = d.get("description_line") or (d["on_screen"] + " This description and video contain affiliate links.")
     L = [disc, "", script.get("description_intro", ""), ""]
+    st = stores_of(project)
+    on = f" on {store_name(next(iter(st)))}" if len(st) == 1 else ""            # "on Amazon" / "on AliExpress"; nothing for a mixed video
+
+    def tag(sub) -> str:
+        return f" [{store_name(store_of(sub.facts))}]" if len(st) > 1 else ""   # store tag only when the video mixes stores
     if project.compare and project.compare["kind"] == "list":
-        L.append("Every product in this list on Amazon:")
+        L.append(f"Every product in this list{on}:")
         for i, (sub, lab) in enumerate(zip(project.compare["products"], project.compare["labels"]), 1):
-            L.append(f"#{i} {lab} ({sub.facts['product_name']}): {sub.facts['affiliate_url']}")
+            L.append(f"#{i} {lab} ({sub.facts['product_name']}){tag(sub)}: {sub.facts['affiliate_url']}")
         links_line = "Links to every product are in the description."
     elif project.compare:
-        L.append("Products compared on Amazon:")
+        L.append(f"Products compared{on}:")
         for i, (sub, lab) in enumerate(zip(project.compare["products"], project.compare["labels"])):
-            L.append(f"{'ABC'[i]}. {lab} ({sub.facts['product_name']}): {sub.facts['affiliate_url']}")
+            L.append(f"{'ABC'[i]}. {lab} ({sub.facts['product_name']}){tag(sub)}: {sub.facts['affiliate_url']}")
         links_line = "Links to each product are in the description."
     else:
-        L.append(f"Product on Amazon: {f['affiliate_url']}")
+        L.append(f"Product on {store_name(next(iter(st)))}: {f['affiliate_url']}")
         links_line = "The product link is in the description."
     L.append("")
     note = [d["ai_voice_note"]]
@@ -103,14 +108,17 @@ def write_review(project: Project, script: dict, entries: list[dict], cov_notes:
         L.append("")
     L += ["## Before you post",
           "- [ ] Watch the whole video with sound. Does every product claim match the listing / your own experience?",
-          "- [ ] Nothing on screen shows a face, a price, a star rating or Amazon page UI.",
+          "- [ ] Nothing on screen shows a face, a price, a star rating or shop page UI (Amazon / AliExpress).",
           *(["- [ ] Every claim is attributed to the RIGHT product" + (", and every ranking reason matches your own notes and criteria." if project.compare["kind"] == "list" else ", and every comparison point is true for ALL the products."),
              "- [ ] Each product's own link is in the description, next to its name."] if project.compare else []),
           *{"full": ["- [ ] The spoken and on-screen disclosure are in the video; paste description.txt (its first line is the disclosure) and title.txt."],
             "on_screen": ["- [ ] The disclosure appears as text on screen near the start (no voice-over line). Paste description.txt and title.txt; post pinned_comment.txt as a pinned comment."],
             "description_only": ["- [ ] Disclosure mode is description_only: nothing is said or shown inside the video. Paste description.txt (disclosure on its FIRST line) and title.txt, then post pinned_comment.txt as the first pinned comment.",
                                  "- [ ] Reminder: the FTC says a disclosure inside the video is clearer than one in the description box. If you ever want text on screen without a voice line, set disclosure: mode: on_screen in config.yaml."]}.get(disclosure_mode, []),
-          "- [ ] Your affiliate link is an Amazon link (amzn.to / amazon.* with your tag), and this channel is listed in your Associates account.",
+          *(["- [ ] Your Amazon links are Associates links (amzn.to / amazon.* with your tag), and this channel is listed in your Associates account."]
+            if "amazon" in stores_of(project) else []),
+          *(["- [ ] Your AliExpress links are your own affiliate links (check your AliExpress affiliate program's rules for video content), and "
+             "no photo or clip was saved from an AliExpress listing: those belong to the sellers."] if "aliexpress" in stores_of(project) else []),
           "- [ ] YouTube's upload form asks about altered/synthetic content. Answer honestly for your AI voice.",
           "- [ ] This video differs meaningfully from your other uploads (different angle, your own footage/observations).",
           "- [ ] If the music file is yours to use, keep its licence info."]
