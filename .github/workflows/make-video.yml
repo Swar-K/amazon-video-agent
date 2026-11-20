@@ -171,6 +171,7 @@ jobs:
         run: |
           # a half-written silent video from a failed run must never be uploaded
           rm -f "projects/$ASIN/out/_video_only.mp4"
+          echo "Files in projects/$ASIN/out right now:"; ls -la "projects/$ASIN/out" 2>/dev/null || echo "(no out folder)"
           for f in projects/"$ASIN"/out/*.mp4; do
             [ -e "$f" ] || continue
             if ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" >/dev/null 2>&1; then
@@ -179,6 +180,9 @@ jobs:
               echo "::error::$f is damaged, removing it so you do not download a broken file"; rm -f "$f"
             fi
           done
+          if { [ "$MODE" = "render" ] || [ "$MODE" = "all" ]; } && [ "${{ steps.run.outcome }}" = "success" ] && ! ls projects/"$ASIN"/out/*.mp4 >/dev/null 2>&1; then
+            echo "::error::The render finished but there is no .mp4 in projects/$ASIN/out, so the artifact will have no video."
+          fi
 
       - name: Upload results
         if: always()
@@ -195,19 +199,24 @@ jobs:
           retention-days: 3          # short on purpose: the free plan has only 500 MB of artifact storage, download your video soon
           if-no-files-found: ignore
 
-      - name: Save script + anti-duplication history
+      - name: Save script, footage choices and history
         # always(): if the render fails after the script was written (for example a policy flag), the script is still saved to the
         # repo, so you can edit projects/<ASIN>/script.md and run mode=render instead of it being lost with the run.
         if: always()
         continue-on-error: true
         run: |
-          mkdir -p /tmp/keep/scripts_archive
-          mkdir -p /tmp/keep/.adagent_state
-          if [ -f .adagent_state/tts_usage.json ]; then cp .adagent_state/tts_usage.json /tmp/keep/.adagent_state/tts_usage.json; fi
-          rm -f /tmp/keep/script.md
-          rm -f /tmp/keep/scenes.md
+          rm -rf /tmp/keep && mkdir -p /tmp/keep/scripts_archive /tmp/keep/state
           if [ "$MODE" != "render" ] && [ "$MODE" != "scenes" ] && [ -f "projects/$ASIN/script.md" ]; then cp "projects/$ASIN/script.md" /tmp/keep/script.md; fi
           if [ "$MODE" = "scenes" ] && [ -f "projects/$ASIN/scenes.md" ]; then cp "projects/$ASIN/scenes.md" /tmp/keep/scenes.md; fi
+          # the footage picked for this video (script/all) and the per-product memory of which footage videos used (after a render)
+          if [ "$MODE" = "script" ] || [ "$MODE" = "all" ]; then
+            if [ -f "projects/$ASIN/selection.json" ]; then cp --parents "projects/$ASIN/selection.json" /tmp/keep/state/; fi
+          fi
+          for f in projects/*/asset_usage.json; do
+            if [ -f "$f" ]; then cp --parents "$f" /tmp/keep/state/; fi
+          done
+          # the Inworld usage ledger (lifetime character count) must survive the reset below
+          if [ -f .adagent_state/tts_usage.json ]; then cp --parents .adagent_state/tts_usage.json /tmp/keep/state/; fi
           cp -r scripts_archive/. /tmp/keep/scripts_archive/ 2>/dev/null || true
           git config user.name "adagent"
           git config user.email "adagent@users.noreply.github.com"
@@ -216,10 +225,10 @@ jobs:
             git reset -q --hard origin/main
             if [ -f /tmp/keep/script.md ]; then cp /tmp/keep/script.md "projects/$ASIN/script.md"; fi
             if [ -f /tmp/keep/scenes.md ]; then cp /tmp/keep/scenes.md "projects/$ASIN/scenes.md"; fi
+            cp -r /tmp/keep/state/. . 2>/dev/null || true
             mkdir -p scripts_archive && cp -r /tmp/keep/scripts_archive/. scripts_archive/ 2>/dev/null || true
-            if [ -f /tmp/keep/.adagent_state/tts_usage.json ]; then mkdir -p .adagent_state && cp /tmp/keep/.adagent_state/tts_usage.json .adagent_state/tts_usage.json; fi
-            # add each path only if it exists: one missing path makes git abort the whole add
-            for f in "projects/$ASIN/script.md" "projects/$ASIN/scenes.md" scripts_archive .adagent_state/tts_usage.json; do
+            # one file at a time: a single missing file used to make 'git add' stage NOTHING
+            for f in "projects/$ASIN/script.md" "projects/$ASIN/scenes.md" "projects/$ASIN/selection.json" projects/*/asset_usage.json scripts_archive .adagent_state/tts_usage.json; do
               if [ -e "$f" ]; then git add -- "$f"; fi
             done
             if git diff --cached --quiet; then echo "nothing to save"; exit 0; fi
