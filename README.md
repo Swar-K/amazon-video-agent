@@ -60,6 +60,23 @@ You can also write your own `script.md` (one line per sentence: `[id] text | pro
 reminder to answer YES to YouTube's synthetic-content question. Your own video clips are graded and styled by the template but are not
 AI-converted. Always check AI clips for distorted products or hands.
 
+## AliExpress products (alongside Amazon)
+Any video (single, comparison, list) can use AliExpress products, Amazon products, or both. Copy `projects/_template_aliexpress/` to
+`projects/<ITEM ID>/` (the number in the AliExpress product URL), set `store: aliexpress` and your AliExpress affiliate link; everything else
+works as for Amazon. As with Amazon, the agent never reads the shop: you supply your own photos, clips and true facts (listing photos belong to
+the sellers). The Amazon Associates sentence is used ONLY when an Amazon product is in the video; AliExpress-only videos get a general affiliate
+disclosure; mixed videos get both, and the description tags each link `[Amazon]` / `[AliExpress]`. Prices, shipping, delivery times, seller ratings
+and order counts are never said. For comparison/list videos list the folders in `compare.yaml` / `list.yaml` exactly as before.
+Check your Amazon Associates and AliExpress affiliate rules for videos that feature both shops: I could not verify them.
+
+## Footage selection (upload as many photos and clips as you like)
+A free local scan (no AI, no Groq tokens) measures every file: sharpness, size, look-alikes, colours, faces, and the best moments of each clip.
+For each video the agent picks a varied, good-quality set sized to the video (a 5 min review: about 27 photos and 13 clips), avoids footage used in
+earlier videos of the same product, and AI-checks only that set. The pick is saved in `selection.json` (the script step makes it, the render step
+reuses it); run the script step again for a new pick. `out/footage_selection.md` lists what was picked and why each other file was not.
+Force a file in with `assets_pin:` in `facts.yaml`. Settings: `assets:` in `config.yaml` (`select: false` uses everything, as before).
+Clips are played from their best moments (sharp and moving) instead of from the start.
+
 ## Subscribe / like / share lines
 Added automatically (`cta:` and `disclosure: outro*` in `config.yaml`): a **subscribe** ask in the intro (after your first hook line; `intro_position: start` moves it
 to the very beginning, `intro: false` turns it off) and **subscribe + like + share** in the outro. Do not write your own; if your script already has a
@@ -92,11 +109,22 @@ Lines that stay unsupported by your facts after a rewrite are **removed** and li
 disclosure inside the video is clearer than one in the description box; `on_screen` is the middle option. You are responsible for compliance.
 
 ## Voices
-`edge_*` free (no commercial-licence statement), `eleven_*` ElevenLabs (free plan: about one video a month, non-commercial, attribution added
-automatically), `openai_*` pay-as-you-go. List with `python -m adagent voices`.
+`inworld_*` Inworld (the shipped default; secret `INWORLD_API_KEY`), `edge_*` free (no commercial-licence statement), `eleven_*` ElevenLabs
+(free plan: about one video a month, non-commercial, attribution added automatically), `openai_*` pay-as-you-go, `openrouter_voxtral` OpenRouter
+(usage-billed). List with `python -m adagent voices`.
+
+**Spending safeguards (all in `config.yaml` -> `voice:`):**
+- **Inworld** counts every character in `.adagent_state/tts_usage.json` (saved to the repo by the workflow) and stops at `free_character_budget`
+  (40,000, a cautious local cap: check your real allowance in your Inworld account). Going past it needs BOTH `allow_paid_fallback: true` in the
+  config AND the workflow box **allow_inworld_paid_tts** for that run.
+- **OpenRouter** is billed per use and is blocked unless ALL THREE are set: `allow_paid: true` and `commercial_use_confirmed: true` in the config
+  (only after you checked the model's price and licence), and the workflow box **allow_paid_tts** for that run. It is never a backup voice.
+- **Backup voice:** only an `edge_*` voice that fails may switch, to the Inworld voice of the same gender. A failing ElevenLabs/OpenAI/Inworld
+  voice stops the run instead. Every run writes `out/voice_report.txt` listing which voice read each line and warns if a backup was used.
+- Lines already voiced are cached and cost nothing on a re-run.
 
 ## Setup
-1. Private GitHub repo with this project. 2. Secrets: `GROQ_API_KEY` (AI), optional `ELEVENLABS_API_KEY`, `OPENAI_API_KEY`.
+1. Private GitHub repo with this project. 2. Secrets: `GROQ_API_KEY` (AI), `INWORLD_API_KEY` (default voice), optional `ELEVENLABS_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`.
 3. Settings -> Actions -> General -> Workflow permissions -> Read and write. 4. `.github/workflows/` holds exactly two files: `make-video.yml` and `clean-artifacts.yml`.
 
 ## Guard-rails
@@ -106,4 +134,4 @@ screened for faces and price/Amazon UI. You still own accuracy, YouTube's rules,
 
 ## Test status
 Offline (simulated AI/voice): script, comparison and list logic, templates (grade, transitions, 5 caption styles, preview), disclosure modes, scenes,
-asset checks, fallback models, full renders under every template. **Not verified:** live Groq / ElevenLabs / Edge calls, the real GitHub run, and the AI-clip notebook on a real GPU.
+asset checks, fallback models, paid-voice guards (Inworld budget and ledger, OpenRouter opt-ins, backup voice), full renders under every template. **Not verified:** live Groq / ElevenLabs / Edge / Inworld calls, the real GitHub run, and the AI-clip notebook on a real GPU.

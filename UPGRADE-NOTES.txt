@@ -39,3 +39,23 @@ BUG-FIX PASS (Nov 14)
 - 'hands-on notes' / 'the notes say' spoken aloud is flagged again (policy rule restored).
 - facts.yaml / compare.yaml / list.yaml: a key written twice is reported again (it used to silently drop the first copy).
 - tests: workflow cache-path assertion updated.
+
+MERGE (Nov 20): update-changed-files.zip (AliExpress stores, footage selection, prescan, outro, store-aware disclosure) + the bug-fix pass above.
+- That update was built from an older snapshot WITHOUT the Inworld/OpenRouter voices, so its config.yaml and make-video.yml were NOT taken as-is:
+  config.yaml = the update + the voice block (inworld_female default, Inworld, backup voice, OpenRouter) kept from your Nov 14 file.
+  make-video.yml = your Nov 14 workflow (voice inputs, INWORLD secret, shared-ledger concurrency, ledger cache) + the video check and
+  uncompressed artifact + the update's new "Save script, footage choices and history" step, with the Inworld ledger added to it.
+- project.py: the update's strict-YAML and "notes read aloud" rules are used (they replace my duplicates); the case-keeping folder fix is kept.
+- New files from the update: adagent/prescan.py, adagent/selection.py, projects/_template_aliexpress/, tests/test_selection_offline.py, tests/test_stores_offline.py.
+- tts.py is unchanged by the update: voice cache key, backup-voice reuse, preflight and out/voice_report.txt are all still in.
+
+FINAL CHECK (Nov 20): every difference between amazon-video-agent-fixed.zip, update-changed-files.zip and the merged folder was read.
+- Taken from the update as-is (nothing of yours lost; its removed lines were refactors that it re-implements): README (then extended, see below),
+  assets.py, finish.py, llm.py, render.py, scriptgen.py, prescan.py, selection.py, the AliExpress template and 8 test files.
+- Merged by hand (the update + your Nov 14 work): make-video.yml, config.yaml, project.py, cli.py, tests/test_limits_and_cta_offline.py.
+  Checked line by line: cli.py got back cache_dir in the voice preflight (the update had dropped it) and logs the background music;
+  project.py keeps mixed-case folder names; the workflow keeps the voice inputs, INWORLD/OPENROUTER secrets, the shared-ledger concurrency
+  group (cancel-in-progress: false), the video check and the ledger in both the cache and the save step.
+- tts.py (not in the update) = your fixed version + out/voice_report.txt.
+- NEW tests/test_paid_voice_guards_offline.py: Inworld budget/ledger/paid switch, OpenRouter opt-ins, backup-voice rules (mocked, nothing billed).
+- README: Voices / Setup / Test status now describe Inworld, OpenRouter, the spending safeguards and the extra secrets.

@@ -88,6 +88,19 @@ templates:
     badge: solid
     endcard: {bg: [8, 8, 10, 175], text: [255, 255, 255]}
 
+# ---- footage selection: you upload as many photos/clips as you like; the agent picks what each video needs
+assets:
+  select: true               # false = use everything in assets/ (and AI-check every file)
+  images_per_video: auto     # auto = sized from the video length (a 5 min review: about 27 photos, each shown 2 to 3 times); or a number
+  clips_per_video: auto      # auto = about 13 clips for a 5 min review
+  per_product_images: auto   # comparison / list videos: per product
+  per_product_clips: auto
+  reuse_penalty: 0.5         # how strongly footage used in earlier videos of the same product is avoided (0 = ignore)
+  duplicate_distance: 5      # near-duplicate photos (smaller number = stricter look-alike test)
+  min_image_px: 480          # smaller photos are skipped
+  min_sharpness: 12          # blurrier photos are skipped (edge strength: sharp photos score 100+, a soft one about 40, a blurry one under 15)
+  max_ai_clips: 8            # AI ad clips (ai_*.mp4) used per product
+
 # ---- AI ad-clip scenes (see notebooks/make_ai_clips.ipynb)
 scenes:
   count: 10               # scenes planned per product
@@ -101,6 +114,7 @@ llm:
     - qwen/qwen3.6-27b    # a name your account does not have is skipped automatically)
     - meta-llama/llama-4-scout-17b-16e-instruct
     - meta-llama/llama-4-maverick-17b-128e-instruct
+  auto_fallbacks: true    # when those are used up too, also try every other suitable model your Groq account offers (each has its own daily quota)
   text_fallbacks:         # the same idea for writing the script
     - openai/gpt-oss-20b
     - qwen/qwen3-32b
@@ -168,13 +182,31 @@ voice:
   pause_sentence: 0.40   # seconds of silence after each narration line
   pause_section: 0.75    # extra pause when the section changes
 
-cta:                 # subscribe ask in the intro (like + share are only in the outro)
+cta:                 # intro + outro lines. They are WRITTEN INTO script.md (edit or delete them there).
   intro: true
-  intro_position: after_hook      # after_hook = after the first hook line (keeps the hook first) | start
+  intro_position: end_of_hook     # end_of_hook = after your hook lines | after_first_line | start
   intro_lines:
     - "If you haven't yet, please subscribe to the channel. Now, let's get into it."
     - "Quick favour: if you haven't subscribed yet, please do. Alright, let's get started."
     - "If you're new here, subscribe to the channel. Let's dive in."
+  outro: true                     # a '## outro' section: like + subscribe + share + comment ask, links, thanks
+  outro_like:                     # {product} = short product name (set short_name: in facts.yaml)
+    - "If you liked this video, please give it a like, subscribe to the channel, and share it with someone who might need it. In the comments, tell me what you think of {product}."
+    - "If this was helpful, give the video a like, subscribe to the channel, and share it with a friend. Tell me in the comments what you think of {product}."
+    - "If you enjoyed this, please like the video, subscribe, and share it with someone who could use it. And tell me in the comments what you think of {product}."
+  outro_links:
+    single:
+      - "I've put the product link in the video description below."
+      - "You'll find the product link in the description below."
+    compare:
+      - "I've put a link for each product in the video description below, each next to its name."
+      - "You'll find every product link in the description below, each next to its name."
+    list:
+      - "I've put a link for every product on this list in the video description below."
+      - "You'll find the link for each product on the list in the description below."
+  outro_thanks:
+    - "Thank you very much for watching the whole video. Hope to see you in the next video. Take care."
+    - "Thanks so much for watching to the end. See you in the next video. Take care."
 
 disclosure:
   # Where the affiliate disclosure appears INSIDE the video (the description and pinned comment always carry it):
@@ -188,6 +220,18 @@ disclosure:
     - "Before we start, I should say this video has an affiliate link, and as an Amazon Associate I earn from qualifying purchases."
     - "One thing up front: I use affiliate links, and as an Amazon Associate I earn from qualifying purchases."
   on_screen: "As an Amazon Associate I earn from qualifying purchases."
+  # AliExpress-only videos use the general texts below (the Amazon Associates sentence is used ONLY when an Amazon product is in the video);
+  # videos that mix Amazon and AliExpress use the *_mixed texts.
+  on_screen_generic: "This video contains affiliate links, so I may earn a commission if you buy through them, at no extra cost to you."
+  spoken_generic:
+    - "Quick note before we get into it: the links below are affiliate links, so I may earn a commission if you buy through them, at no extra cost to you."
+    - "Before we start, I should say this video has affiliate links, and I may earn a commission if you buy through them, at no extra cost to you."
+    - "One thing up front: I use affiliate links, so I may earn a commission from purchases made through them, at no extra cost to you."
+  on_screen_mixed: "As an Amazon Associate I earn from qualifying purchases. Links to other stores are affiliate links too, so I may earn a commission there as well."
+  spoken_mixed:
+    - "Quick note before we get into it: as an Amazon Associate I earn from qualifying purchases, and the links to other stores are affiliate links too, so I may earn a commission there as well."
+    - "Before we start, I should say this video has affiliate links: as an Amazon Associate I earn from qualifying purchases, and I may also earn a commission on the other store's links."
+    - "One thing up front: as an Amazon Associate I earn from qualifying purchases, and my links to other stores are affiliate links too."
   tag: "Contains affiliate links"
   ai_voice_note: "Narration in this video is AI-generated."
   ai_tag: "AI-generated scene"
