@@ -17,7 +17,7 @@ from .common import load_config, log
 from .llm import DailyLimitError
 from .overlay import build_overlays
 from .templates import apply_template, tpl_of
-from .project import POLICY_RULES, check_text, load_project, validate_facts
+from .project import POLICY_RULES, apply_disclosure, check_text, load_project, stores_of, strip_allowed_stores, validate_facts
 
 
 def _slug(s: str) -> str:
@@ -44,6 +44,9 @@ def _prep(args, need_vision=True):
         if getattr(args, k, None):
             cfg["video"][k] = getattr(args, k)
     project = load_project(args.asin)
+    stores = apply_disclosure(cfg, project)
+    if stores != {"amazon"}:
+        log("Stores in this video: " + ", ".join(sorted(s.title() if s != "aliexpress" else "AliExpress" for s in stores)))
     key = choose_length(cfg, project, getattr(args, "length", None))
     log(f"Length preset: {key} ({cfg['length']['min_minutes']}-{cfg['length']['max_minutes']} min, aim {cfg['length']['target_minutes']})")
     tpl = apply_template(cfg, getattr(args, "template", None))
@@ -55,7 +58,9 @@ def _prep(args, need_vision=True):
     if errors:
         raise SystemExit("\n".join(["Fix these in facts.yaml first:"] + [f"  - {e}" for e in errors]))
     log("Checking assets ...")
-    entries = A.build_index_for(project, cfg, vision=not getattr(args, "no_vision", False))
+    entries = A.build_index_for(project, cfg, vision=not getattr(args, "no_vision", False),
+                                lock="write" if args.__dict__.get("cmd") in ("script", "all") else "read",
+                                reselect=getattr(args, "reselect", False), select_all=getattr(args, "all_assets", False))
     for e in entries:
         if not e["usable"]:
             log(f"  EXCLUDED {e.get('label', '')} {e['file']}: {e['reason']}".replace("  EXCLUDED  ", "  EXCLUDED "))
@@ -137,9 +142,10 @@ def run_render(args, cfg, project, entries, warns, script):
     bad = []
     for s in segs:
         full = s["text"] + " " + s.get("onscreen", "")
-        pol, _ = check_text(full)
+        stores = stores_of(project)
+        pol, _ = check_text(full, stores)
         if pol:
-            hits = sorted({m.group(0) for pat, _w in POLICY_RULES for m in [re.search(pat, full, re.I)] if m})
+            hits = sorted({m.group(0) for pat, _w in POLICY_RULES for m in [re.search(pat, strip_allowed_stores(full, stores), re.I)] if m})
             bad.append(f"  [{s['id']}] {', '.join(pol)} -> matched: {', '.join(repr(h) for h in hits)}\n"
                        f"      text: {s['text']}" + (f"\n      on-screen: {s['onscreen']}" if s.get("onscreen") else ""))
     if bad:
@@ -225,6 +231,7 @@ def run_render(args, cfg, project, entries, warns, script):
 
     final = out / f"{project.asin}_{_slug(script.get('title') or project.facts['product_name'])}.mp4"
     music = F.find_music(project)
+    log(f"Background music: {music.name if music else 'none'}")
     F.mux(silent, voice_wav, final, args.max_seconds or tl.total, music)
     silent.unlink(missing_ok=True)
     F.write_description(project, cfg, script, tl, vinfo, out / "description.txt")
@@ -234,6 +241,8 @@ def run_render(args, cfg, project, entries, warns, script):
         shutil.copy(project.dir / "script.md", out / "script_used.md")
     if not args.max_seconds:
         S.save_archive(project, script)
+        from . import selection as SEL
+        SEL.record_usage(project, shots, script.get("angle"), script.get("title", ""))      # so the next video of this product looks different
     log(f"\nDone: {final}\nAlso: description.txt, REVIEW_CHECKLIST.md")
 
 
@@ -260,6 +269,8 @@ def main(argv=None):
     def common(sp, voice=False, script=False, render=False):
         sp.add_argument("asin")
         sp.add_argument("--no-vision", action="store_true", help="skip AI image checks (tests only)")
+        sp.add_argument("--reselect", action="store_true", help="pick the footage again instead of using the saved selection.json")
+        sp.add_argument("--all-assets", action="store_true", help="no footage selection: AI-check and use every file (uses many Groq tokens)")
         if script or render:
             sp.add_argument("--length", choices=["auto", "standard", "short"], help="auto = by video type, always under 9 min (default); short = 1.5-4.8 min")
         if script:

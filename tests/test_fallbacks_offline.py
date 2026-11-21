@@ -115,7 +115,7 @@ summ = by["Show the result on the run summary page"]
 assert summ["if"] == "always()" and "GITHUB_STEP_SUMMARY" in summ["run"] and "::error" in summ["run"] and "steps.run.outcome" in summ["run"]
 up = by["Upload results"]
 assert "run.log" in up["with"]["path"] and up["with"]["retention-days"] == 3
-assert by["Save script + anti-duplication history"]["if"] == "always()"
+assert by["Save script, footage choices and history"]["if"] == "always()"
 cl = yaml.safe_load((ROOT / ".github/workflows/clean-artifacts.yml").read_text())
 assert cl["permissions"] == {"actions": "write"} and cl[True]["workflow_dispatch"]["inputs"]["older_than_days"]["default"] == "1"
 cfg = yaml.safe_load((ROOT / "config.yaml").read_text())["llm"]

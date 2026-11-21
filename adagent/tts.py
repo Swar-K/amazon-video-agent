@@ -640,6 +640,7 @@ def synthesize_all(
 
     output = []
     fallback_used = []          # (segment number, provider, voice) for every line read by a different voice
+    report = []                 # one row per narration line: who voiced it, for out/voice_report.txt
 
     for i, segment in enumerate(segments):
         ident = _line_ident(cfg, voice, segment["text"])
@@ -653,6 +654,7 @@ def synthesize_all(
             raw.unlink(missing_ok=True)
 
         used_fallback = None
+        was_cached = raw.exists()
         if not raw.exists():
             previous = segments[i - 1]["text"] if i else ""
             following = segments[i + 1]["text"] if i + 1 < len(segments) else ""
@@ -740,9 +742,24 @@ def synthesize_all(
                 temp_raw.unlink(missing_ok=True)
                 raise
 
+        if used_fallback:
+            _p, _k, _v = used_fallback
+            report.append((i + 1, _p, _v.get("voice_id", _v.get("voice")), "BACKUP voice", segment["text"]))
+        else:
+            report.append((i + 1, voice["provider"], voice.get("voice_id", voice.get("voice")),
+                           "from cache" if was_cached else "newly generated", segment["text"]))
         clean = _to_clean_array(raw, tdir / (ident + ".clean.wav"))
         output.append(clean)
 
+    try:
+        rep = Path(project.dir) / "out" / "voice_report.txt"
+        rep.parent.mkdir(parents=True, exist_ok=True)
+        lines = [f"Voice you picked: {primary_key} ({voice['provider']}, {voice.get('voice_id', voice.get('voice'))})",
+                 f"Lines read by a backup voice: {len(fallback_used)} of {len(segments)}", ""]
+        lines += [f"{n:>3}. {prov} / {vid}  [{how}]  {txt[:70]}" for n, prov, vid, how, txt in report]
+        rep.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    except Exception as exc:                      # a report must never stop a render
+        log(f"  (could not write voice_report.txt: {exc})")
     if fallback_used:
         nums = ", ".join(str(n) for n, _, _ in fallback_used)
         log(f"\n  WARNING: {len(fallback_used)} of {len(segments)} narration line(s) were read by the backup voice "

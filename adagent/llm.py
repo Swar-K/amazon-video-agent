@@ -56,6 +56,23 @@ def groq_models(key: str) -> list[str]:
     return sorted(m["id"] for m in r.json().get("data", []))
 
 
+def _is_vision_id(i: str) -> bool:
+    low = i.lower()
+    m = re.search(r"qwen3\.(\d+)", low)       # Qwen 3.5 and later are natively multimodal
+    return any(t in low for t in ("scout", "maverick", "vision", "-vl")) or bool(m and int(m.group(1)) >= 5)
+
+
+def _auto_candidates(kind: str, exclude: set) -> list[str]:
+    """Models in YOUR Groq account that can do this job and were not tried yet (each has its own daily quota)."""
+    try:
+        ids = groq_models(os.environ.get("GROQ_API_KEY", ""))
+    except Exception:
+        return []
+    ok = [i for i in ids if i not in exclude and i not in _exhausted and
+          (_is_vision_id(i) if kind == "vision" else not any(t in i.lower() for t in _NOT_TEXT))]
+    return ok[:6]
+
+
 def _pick_substitute(model: str, vision: bool, ids: list[str]) -> str | None:
     if model in ids:
         return model
@@ -63,11 +80,7 @@ def _pick_substitute(model: str, vision: bool, ids: list[str]) -> str | None:
         if m in ids:
             return m
     if vision:
-        def is_vision(i: str) -> bool:
-            low = i.lower()
-            m = re.search(r"qwen3\.(\d+)", low)       # Qwen 3.5 and later are natively multimodal
-            return any(t in low for t in ("scout", "maverick", "vision", "-vl")) or bool(m and int(m.group(1)) >= 5)
-        cands = [i for i in ids if is_vision(i)]
+        cands = [i for i in ids if _is_vision_id(i)]
     else:
         cands = [i for i in ids if not any(t in i.lower() for t in _NOT_TEXT)]
     return cands[0] if cands else None
@@ -217,26 +230,44 @@ def ask(model: str, system: str, user: str, images: list[np.ndarray] | None = No
     # llm.text_fallbacks in config.yaml (every model has its own daily quota).
     kind = "vision" if images else "text"
     chain = [model] + [x for x in (_llm_cfg().get(f"{kind}_fallbacks") or []) if x != model]
+    ok, out, last = _try_models(chain, system, user, images, max_tokens, temperature, daily_seen=False)
+    if ok:
+        return out
+    if _llm_cfg().get("auto_fallbacks", True) and any(x in _exhausted for x in chain):
+        extra = _auto_candidates(kind, set(chain))      # every other suitable model your account offers
+        if extra:
+            log(f"  Also trying other {kind} models from your Groq account: {', '.join(extra)}")
+            ok, out, last2 = _try_models(extra, system, user, images, max_tokens, temperature, daily_seen=True)
+            if ok:
+                return out
+            chain = chain + extra
+            last = last or last2
+    if len(chain) == 1 and last is not None:
+        raise last
+    raise DailyLimitError(f"Every {kind} model has hit its daily limit today ({', '.join(chain)}). "
+                          "Waiting a minute will not help: the quotas refill gradually over about 24 hours.")
+
+
+def _try_models(chain, system, user, images, max_tokens, temperature, daily_seen: bool):
+    """Try each model in order. (True, reply, None) on success; (False, None, last_error) when all are used up/unusable."""
     last = None
     for i, m in enumerate(chain):
         if m in _exhausted:
             continue
         try:
-            return _ask_groq(m, system, user, images, max_tokens, temperature)
+            return True, _ask_groq(m, system, user, images, max_tokens, temperature), None
         except DailyLimitError as e:
             _exhausted.add(m)
+            daily_seen = True
             last = e
             nxt = next((x for x in chain[i + 1:] if x not in _exhausted), None)
             log(f"  Daily limit reached for '{m}'." + (f" Trying '{nxt}' instead ..." if nxt else ""))
         except RuntimeError as e:
-            if not any(x in _exhausted for x in chain[:i]):
+            if not daily_seen and not any(x in _exhausted for x in chain[:i]):
                 raise                           # the first-choice model failed for another reason: report it as before
             log(f"  Fallback model '{m}' could not be used ({str(e)[:140]}); trying the next one ...")
             last = last or e
-    if len(chain) > 1:
-        raise DailyLimitError(f"Every configured {kind} model has hit its daily limit today ({', '.join(chain)}). "
-                              "Waiting a minute will not help: the quotas refill gradually over about 24 hours.")
-    raise last
+    return False, None, last
 
 
 if __name__ == "__main__":

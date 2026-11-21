@@ -1,6 +1,6 @@
 """Scan the project's assets, describe them, and screen out anything unusable.
 
-Screening rules (the video must be faceless and must not show Amazon UI):
+Screening rules (the video must be faceless and must not show shop page UI (Amazon, AliExpress)):
   * any human face (vision model + OpenCV backup)  -> excluded
   * visible prices / star ratings / review text / buy buttons -> excluded
   * not actually showing the product                -> excluded
@@ -116,7 +116,7 @@ VISION_PROMPT = """Inspect {what}. Return JSON with exactly these keys:
 {{"description": "<=25 words, literal description of what is visible: product, angle, setting, notable details>",
   "shows_product": true/false,
   "has_human_face": true/false,   // ANY human face, even partial, small, in a photo on packaging, or a reflection
-  "has_price_or_rating_ui": true/false,  // visible price, star rating, review text, Amazon page UI, buy button, badge like 'Best Seller'
+  "has_price_or_rating_ui": true/false,  // visible price, star rating, review text, Amazon/AliExpress page UI, buy button, badge like 'Best Seller', 'Choice' or 'Free shipping'
   "has_third_party_logo_or_watermark": true/false}}
 Do not guess about things you cannot see."""
 
@@ -137,12 +137,16 @@ def describe(cfg: dict, frames: list[np.ndarray], kind: str) -> dict:
     raise RuntimeError(f"Vision check failed: {last}")
 
 
-def build_index(project: Project, cfg: dict, vision: bool = True) -> list[dict]:
+def build_index(project: Project, cfg: dict, vision: bool = True, *, select: bool = False, store=None, key: str = "main",
+                budget: tuple[int, int] | None = None, reselect: bool = False, report: list | None = None,
+                label: str = "") -> list[dict]:
     """Return a list of asset dicts (usable and unusable) and cache it. Progress is saved after every photo, so a stopped
-    run never has to re-check what was already checked."""
+    run never has to re-check what was already checked.
+    select=True: a free local pre-scan picks the footage for THIS video (varied, good quality, not used in earlier videos) and only
+    those files are AI-checked; the pick is saved in `store` (selection.json) so 'script' and 'render' use the same files."""
     if vision and not cfg.get("llm", {}).get("vision_check", True):
         log("  (AI photo check is turned off in config.yaml: llm.vision_check. Faces are only checked locally; "
-            "look through your photos yourself for faces, prices and Amazon page elements.)")
+            "look through your photos yourself for faces, prices and shop page elements (Amazon, AliExpress).)")
         vision = False
     cache_file = project.cache_dir / "assets_index.json"
     cache = {}
@@ -154,14 +158,48 @@ def build_index(project: Project, cfg: dict, vision: bool = True) -> list[dict]:
     allow = {str(x).lower() for x in (project.facts.get("assets_allow") or [])}
     files = sorted(p for p in project.assets_dir.glob("*") if p.suffix.lower() in IMG_EXT | VID_EXT)
     entries: list[dict] = []
+    chosen = None
+    scan: dict = {}
+    starts: dict = {}
+    if select:
+        from . import prescan
+        from . import selection as SEL
+        scan = prescan.scan_all(project, files, cfg)
+        names = {p.name for p in files}
+        uses, starts = SEL.uses_of(project.dir)
+        saved = None if (reselect or store is None) else store.get(key)
+        if saved and set(saved) <= names:
+            chosen, skipped = set(saved), {n: "not in the saved pick (selection.json)" for n in names - set(saved)}
+            log(f"  footage: using the saved pick of {len(chosen)} file(s) (selection.json); run the script step again for a new pick")
+        else:
+            if saved:
+                log("  the saved footage pick names files that no longer exist: picking again")
+            low = {n.lower(): n for n in names}
+            pins = {low[str(x).lower()] for x in (project.facts.get("assets_pin") or []) if str(x).lower() in low}
+            n_img, n_clip = budget or SEL.budgets(cfg, None)
+            picked, skipped = SEL.choose(scan, cfg, n_img, n_clip, uses, pins, allow)
+            chosen = set(picked)
+            if store is not None:
+                store.put(key, picked)
+            from collections import Counter
+            why = Counter(("look-alike" if "near-duplicate" in r else "kept for another video" if "not needed" in r
+                           else "face" if "face" in r else r.split(" (")[0]) for r in skipped.values())
+            n_p = sum(1 for n in chosen if scan[n]["kind"] == "image")
+            log(f"  footage: picked {n_p} photo(s) + {len(chosen) - n_p} clip(s) out of {len(files)} files"
+                + (f" (not used: {', '.join(f'{v} {k}' for k, v in why.most_common())})" if skipped else ""))
+        if report is not None:
+            report.append((label or project.asin, sorted(chosen), skipped, scan))
 
     def save() -> None:
         merged = dict(cache)
-        merged.update({x["hash"]: x for x in entries if "hash" in x})
+        merged.update({x["hash"]: {k: v for k, v in x.items() if k not in ("windows", "quality")} for x in entries if "hash" in x})
         cache_file.write_text(json.dumps(list(merged.values()), indent=1))
 
     n_new = 0
+    n_todo = len(chosen) if chosen is not None else len(files)
     for i, p in enumerate(files, 1):
+        if chosen is not None and p.name not in chosen:
+            continue
         h = sha1_file(p)
         fresh = False
         if h in cache and (cache[h].get("vision") or not vision):
@@ -193,11 +231,11 @@ def build_index(project: Project, cfg: dict, vision: bool = True) -> list[dict]:
                     save()
                     raise SystemExit(
                         f"{err}\n"
-                        f"Your progress is saved: {len(entries)} of {len(files)} files in projects/{project.asin}/assets were already checked "
+                        f"Your progress is saved: {len(entries)} of {n_todo} files in projects/{project.asin}/assets were already checked "
                         "and will not be checked again.\n"
                         "What you can do: (1) run again tomorrow, (2) add models under llm.vision_fallbacks in config.yaml (names from "
                         "your Groq account's model list), (3) turn the AI photo check off with  llm: vision_check: false  in config.yaml "
-                        "(then check your own photos for faces and Amazon page elements), or (4) upgrade the Groq tier.")
+                        "(then check your own photos for faces and shop page elements (Amazon, AliExpress)), or (4) upgrade the Groq tier.")
                 e["description"] = str(v.get("description", p.stem))
                 e["shows_product"] = as_bool(v.get("shows_product"), True)
                 e["llm_face"] = as_bool(v.get("has_human_face"), False)
@@ -210,7 +248,7 @@ def build_index(project: Project, cfg: dict, vision: bool = True) -> list[dict]:
         if (e.get("llm_face") or e.get("haar_face")) and p.name.lower() not in allow:
             reasons.append("shows a human face")
         if e.get("price_ui") and p.name.lower() not in allow:
-            reasons.append("shows price/rating/Amazon UI")
+            reasons.append("shows price/rating/shop page UI")
         if not e.get("shows_product", True) and p.name.lower() not in allow and not p.name.lower().startswith("ai_"):
             reasons.append("does not show the product")
         e["usable"] = not reasons
@@ -219,6 +257,13 @@ def build_index(project: Project, cfg: dict, vision: bool = True) -> list[dict]:
         if fresh:
             n_new += 1
             save()
+    if select:
+        for e in entries:
+            f = scan.get(e["file"])
+            if f:
+                e["quality"] = f["quality"]
+                if e["kind"] == "clip":
+                    e["windows"] = SEL.ordered_windows(f, starts.get(e["file"], []))
     save()
     return entries
 
@@ -239,19 +284,25 @@ def coverage_report(entries: list[dict], target_seconds: float) -> tuple[float, 
     return cov, notes
 
 
-def build_compare_index(project: Project, cfg: dict, vision: bool = True) -> list[dict]:
-    """Footage for a comparison: every product's own assets (ids P1-A01, P2-A01 ...) plus optional shared footage (X-A01)."""
+def build_compare_index(project: Project, cfg: dict, vision: bool = True, store=None, reselect: bool = False,
+                        select_all: bool = False, report: list | None = None) -> list[dict]:
+    """Footage for a comparison/list: every product's own assets (ids P1-A01, P2-A01 ...) plus optional shared footage (X-A01)."""
+    from . import selection as SEL
+    select = (not select_all) and bool(cfg.get("assets", {}).get("select", True))
+    bud = SEL.budgets(cfg, project.compare["kind"], len(project.compare["products"])) if select else None
     entries: list[dict] = []
     for i, (sub, label) in enumerate(zip(project.compare["products"], project.compare["labels"]), 1):
         log(f"Product {i} ({label}, {sub.asin}):")
-        for e in build_index(sub, cfg, vision=vision):
+        for e in build_index(sub, cfg, vision=vision, select=select, store=store, key=sub.asin, budget=bud,
+                             reselect=reselect, report=report, label=f"{label} ({sub.asin})"):
             e = dict(e)
             e["id"], e["product"], e["label"] = f"P{i}-{e['id']}", str(i), label
             e["path"] = str(sub.assets_dir / e["file"])
             entries.append(e)
     if project.assets_dir.exists() and any(project.assets_dir.glob("*")):
         log("Shared footage (comparison folder):")
-        for e in build_index(project, cfg, vision=vision):
+        for e in build_index(project, cfg, vision=vision, select=select, store=store, key="X", budget=(4, 2),
+                             reselect=reselect, report=report, label="shared footage"):
             e = dict(e)
             e["id"], e["product"], e["label"] = f"X-{e['id']}", "all", "shared"
             e["path"] = str(project.assets_dir / e["file"])
@@ -259,5 +310,22 @@ def build_compare_index(project: Project, cfg: dict, vision: bool = True) -> lis
     return entries
 
 
-def build_index_for(project: Project, cfg: dict, vision: bool = True) -> list[dict]:
-    return build_compare_index(project, cfg, vision) if project.compare else build_index(project, cfg, vision)
+def build_index_for(project: Project, cfg: dict, vision: bool = True, lock: str = "read", reselect: bool = False,
+                    select_all: bool = False) -> list[dict]:
+    """lock='write' (script / all): pick the footage and save it to selection.json. lock='read' (render, scenes, index, preview):
+    use the saved pick, or pick without saving. select_all=True: no selection, every file is AI-checked (uses many Groq tokens)."""
+    from . import selection as SEL
+    select = (not select_all) and bool(cfg.get("assets", {}).get("select", True))
+    store = SEL.SelectionStore(project.dir / "selection.json", write=(lock == "write")) if select else None
+    report: list = []
+    if project.compare:
+        entries = build_compare_index(project, cfg, vision, store, reselect, select_all, report)
+    else:
+        entries = build_index(project, cfg, vision, select=select, store=store, key=project.asin, budget=SEL.budgets(cfg, None),
+                              reselect=reselect, report=report, label=project.asin)
+    if store is not None:
+        store.save()
+    if select and report:
+        project.out_dir.mkdir(parents=True, exist_ok=True)
+        SEL.write_report(project.out_dir / "footage_selection.md", project.asin, report)
+    return entries

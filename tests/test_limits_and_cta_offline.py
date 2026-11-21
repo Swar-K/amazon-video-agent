@@ -36,7 +36,7 @@ def fake_post(url, headers=None, json=None, timeout=0):
 
 
 L.requests.post = fake_post
-L._llm_cfg = lambda: {"provider": "groq"}      # no fallback models here: a daily limit on the only model must stop at once
+L._llm_cfg = lambda: {"provider": "groq", "auto_fallbacks": False}      # no fallback models here: a daily limit on the only model must stop at once
 
 # ---- 1. daily limit: stop at once, with the numbers; a per-minute limit still retries
 TPD = ('{"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` service tier `on_demand` on tokens per day (TPD): '
@@ -103,8 +103,9 @@ print("  photo checks saved per photo, resumed, and can be switched off: OK")
 p = load_project("TEST000001")
 script = S.md_to_script((p.dir / "script.md").read_text())
 segs = S.assemble(script, p, cfg)
-assert segs[0]["section"] == "hook" and segs[1]["id"] == "S", [s["id"] for s in segs[:3]]
-assert "subscribe" in segs[1]["text"].lower() and not re.search(r"\blike\b|\bshare\b", segs[1]["text"], re.I), "intro: subscribe only"
+sidx = [s["id"] for s in segs].index("S")
+assert segs[0]["section"] == "hook" and sidx == len([x for x in script["segments"][:6] if x["section"] == "hook"]) and segs[sidx + 1]["section"] != "hook", [s["id"] for s in segs[:5]]
+assert "subscribe" in segs[sidx]["text"].lower() and not re.search(r"\blike\b|\bshare\b", segs[sidx]["text"], re.I), "intro: subscribe only"
 assert segs[-1]["section"] == "outro" and all(w in segs[-1]["text"].lower() for w in ("subscribe", "like", "share"))
 c2 = copy.deepcopy(cfg); c2["cta"]["intro_position"] = "start"
 assert S.assemble(script, p, c2)[0]["id"] == "S"
@@ -223,3 +224,77 @@ try:
 finally:
     (d / "facts.yaml").unlink(); d.rmdir()
 print("  a key written twice is reported with its line number: OK")
+
+# ---- 10. a list item missing its '- ' is reported on the RIGHT line (YAML itself points at the line after it)
+from adagent.project import read_yaml
+tmpl = (Path(__file__).resolve().parent.parent / "projects" / "_template_list" / "list.yaml").read_text().splitlines()
+yd = Path(__file__).resolve().parent.parent / "projects" / "TESTYAMLX"
+yd.mkdir(exist_ok=True)
+try:
+    bad = list(tmpl)
+    bad.insert(14, "  best cooling towels for hot weather")             # a keyword typed without its dash, right above 'products:'
+    (yd / "list.yaml").write_text("\n".join(bad))
+    try:
+        read_yaml(yd / "list.yaml"); raise AssertionError("must be refused")
+    except SystemExit as e:
+        m = str(e)
+        assert "line 16" in m and "probably wrong is line 15" in m and "'best cooling towels for hot weather'" in m, m
+        assert ">  15 |   best cooling towels for hot weather" in m and "start with '- '" in m, m
+    (yd / "list.yaml").write_text("\n".join(tmpl))
+    assert read_yaml(yd / "list.yaml")["products"], "the untouched template must still load"
+finally:
+    (yd / "list.yaml").unlink(missing_ok=True)
+    yd.rmdir()
+print("  a keyword missing its '- ' is reported on the right line, with the lines around it: OK")
+
+
+# ---- 11. the intro and outro are WRITTEN INTO script.md (visible and editable), and never added twice
+cfgw = load_config()
+q = load_project("TEST000001")
+q.facts["short_name"] = "MARWOOD door draft blocker"
+sc = {"title": "T", "description_intro": "x", "tags": [], "angle": "honest_pros_cons", "review": {}, "segments": [
+    {"id": "1", "section": "hook", "text": "Imagine a chilly draft under a bedroom door.", "product": "all", "onscreen": "", "asset_ids": ["A02"], "priority": 1, "source": "product"},
+    {"id": "2", "section": "hook", "text": "Now picture a soft grey dog blocking it.", "product": "all", "onscreen": "", "asset_ids": ["A05"], "priority": 1, "source": "product"},
+    {"id": "3", "section": "overview", "text": "It is a fabric tube filled with sand.", "product": "all", "onscreen": "", "asset_ids": [], "priority": 1, "source": "product"},
+    {"id": "4", "section": "verdict", "text": "That is the whole story.", "product": "all", "onscreen": "", "asset_ids": [], "priority": 1, "source": "product"}]}
+S.add_cta(sc, q, cfgw)
+ids = [x["id"] for x in sc["segments"]]
+assert ids == ["1", "2", "I1", "3", "4", "O1", "O2", "O3"], ids                  # intro at the END of the hook, outro section last
+txt = {x["id"]: x["text"] for x in sc["segments"]}
+assert "subscribe" in txt["I1"].lower() and not re.search(r"\blike\b|\bshare\b", txt["I1"], re.I)
+assert all(w in txt["O1"].lower() for w in ("like", "subscribe", "share", "comments")) and "MARWOOD door draft blocker" in txt["O1"]
+assert "link" in txt["O2"].lower() and "description" in txt["O2"].lower() and "thank" in txt["O3"].lower()
+assert all(x["section"] == "outro" and x["priority"] == 1 for x in sc["segments"][-3:]) and sc["segments"][2]["priority"] == 2
+md = S.script_to_md(sc, q)
+assert "## hook" in md and "## outro" in md and "[I1] " in md and "[O3] " in md and "edit or delete them" in md
+back = S.md_to_script(md)
+assert [x["id"] for x in back["segments"]] == ids and back["segments"][-1]["section"] == "outro"
+full = S.assemble(back, q, cfgw)
+assert [x["id"] for x in full].count("S") == 0 and not any(x["id"] == "O" for x in full), "nothing is added a second time"
+assert full[-1]["id"] == "O3" and full[-1].get("endcard") is True and not any(x.get("endcard") for x in full[:-1])
+back2 = S.md_to_script(md)
+back2["segments"] = [x for x in back2["segments"] if x["section"] != "outro"]
+fb = S.assemble(back2, q, cfgw)
+assert fb[-1]["section"] == "outro" and all(w in fb[-1]["text"].lower() for w in ("subscribe", "like", "share"))
+n = len(sc["segments"]); S.add_cta(sc, q, cfgw)
+assert len(sc["segments"]) == n
+for pos, want in (("start", 0), ("after_first_line", 1), ("end_of_hook", 2)):
+    c = copy.deepcopy(cfgw); c["cta"]["intro_position"] = pos
+    t = {"segments": [dict(x) for x in back2["segments"] if x["id"] != "I1"]}
+    S.add_cta(t, q, c)
+    assert [x["id"] for x in t["segments"]].index("I1") == want, (pos, [x["id"] for x in t["segments"]])
+c = copy.deepcopy(cfgw); c["cta"]["intro"] = False; c["cta"]["outro"] = False
+t = {"segments": [dict(x) for x in back2["segments"] if x["id"] != "I1"]}
+S.add_cta(t, q, c)
+assert not any(x["id"] in ("I1", "O1") for x in t["segments"])
+own = {"segments": [dict(x) for x in back2["segments"] if x["id"] != "I1"]}
+own["segments"].insert(2, {"id": "i9", "section": "hook", "text": "Please subscribe if you haven't yet.", "product": "all", "onscreen": "", "asset_ids": [], "priority": 2, "source": "product"})
+S.add_cta(own, q, cfgw)
+assert not any(x["id"] == "I1" for x in own["segments"])
+cq = load_project("CMPTEST001")
+t = {"segments": [{"id": "1", "section": "hook", "text": "Two bottles.", "product": "all", "onscreen": "", "asset_ids": [], "priority": 1, "source": "product"}]}
+S.add_cta(t, cq, cfgw)
+o = " ".join(x["text"] for x in t["segments"] if x["section"] == "outro")
+assert "each next to its name" in o or "every product link" in o.lower(), o
+assert "TestCo and OtherCo" in o, o
+print("  intro (end of hook) and outro section are written into script.md, editable, never doubled: OK")
