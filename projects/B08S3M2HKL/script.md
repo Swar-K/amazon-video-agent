@@ -16,7 +16,7 @@
 
 ## overview
 [4] The strip is described as flexible silicone, with an approximate width of 1.4 inches and an advertised thickness of 0.19 inches. | p: 2
-[5] The three-roll package gives you separate lengths to measure and cut for different openings. The amount you need will depend on the gaps you plan to seal. | p: 2
+[5] The individual rolls can be measured and cut for different openings. The amount you need will depend on the gaps you plan to seal. | p: 2
 [6] The brand describes the silicone as flexible and designed to resist creasing or hardening during use. That is a product claim, not a result from our own testing. | p: 2
 [7] Its transparent finish is intended to be less noticeable on compatible frames, although clear material may still catch the light or remain visible. | p: 2
 
@@ -43,7 +43,7 @@
 [21] Renters should also check whether applying adhesive weather stripping is allowed on the surface or property they are using. | p: 2
 
 ## verdict
-[22] Alien Draft Seal's main appeal is straightforward: flexible transparent silicone, adhesive-backed application, and approximately 49 feet across three rolls. | p: 1
+[22] Alien Draft Seal's main appeal is straightforward: flexible transparent silicone and adhesive-backed application without screws. | p: 1
 [23] It is best viewed as a targeted weather-stripping option for suitable small gaps, not a fix for major openings or damaged frames. No specific energy-bill savings or temperature improvement is guaranteed. | p: 1
 
 ## outro
