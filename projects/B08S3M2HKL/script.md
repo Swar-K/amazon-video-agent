@@ -1,71 +1,52 @@
-# TITLE: how to install Alien Draft Seal Transparent Silicone door draft stopper 
-# INTRO: A hands‑on look at Alien's 49‑foot transparent silicone draft seal. We'll see what stands out, how it installs, and who might benefit.
-# TAGS: No more cold drafts, seals gaps around windows and doors, keep your house warm, Winter weather, drafty gaps, how to stop cold air coming through windows, how to seal drafty windows, door and window weather stripping, transparent silicone draft seal, weatherproofing your home
-# ANGLE: first_impressions
+# TITLE: Alien Draft Seal Review: 49-Foot Silicone Weather Stripping
+# INTRO: A practical look at Alien Draft Seal, what the package includes, how the adhesive-backed strip is intended to be installed, and where it may or may not be a good fit.
+# TAGS: Alien Draft Seal, silicone weather stripping, door weather stripping, window weather stripping, transparent draft seal, seal drafty windows, seal gaps around doors, winter home weatherproofing, reduce cold drafts, adhesive weather stripping
+# ANGLE: honest_pros_cons
 #
 # HOW TO EDIT: change any wording, delete a line to cut it, add a line with a new id (e.g. [n1]).
 # Format:  [id] narration | product: 1-9/all | callout: up to 4 words | assets: A01,A02 | p: 1-3
 # The sign-off is added automatically; where the affiliate disclosure appears is set in config.yaml (disclosure: mode). Do not add prices, ratings or review quotes.
 # Edit this file in place (projects/B08S3M2HKL/script.md), commit, then run the render step.
 
-
 ## hook
-[1] No more cold drafts? That's the promise, but let's see what this door draft stopper actually does for a typical winter home. | p: 1
-[I1] Please subscribe to our channel if you haven't yet. Let's get started with the Alien Draft kit for Windows and Doors. | p: 1
-[2] I’m unboxing three rolls that total roughly 49 feet, all clear and flexible, ready for a DIY seal job. | assets: A04 | p: 1
-
-## context
-[3] Winter weather drives a lot of us to hunt for ways to keep our houses warm without cranking the furnace. | p: 2
+[1] Cold air around a window or door can make a room less comfortable. Alien Draft Seal is designed to cover certain small gaps, but is it the right kind of weather stripping for your home? | p: 1
+[I1] If practical product reviews are useful, subscribe and let's take a closer look. | p: 1
+[2] The package contains three rolls of transparent silicone weather stripping, with approximately 49 feet of material in total. | p: 1
+[3] This is an adhesive-backed strip for suitable gaps around windows and doors. It is not a freestanding fabric or weighted door draft stopper. | p: 1
 
 ## overview
-[4] Alien’s Draft door draft stopper Seal is a transparent silicone flap, about 1.4 inches wide and 0.19 inches thick, backed with adhesive. | p: 2
-[x1] The package comes with three rolls, together giving roughly forty nine feet of clear silicone, so you can tackle several openings in one go. | callout: 49 ft total | assets: A04 | p: 2
-[5] The package includes three rolls, each roughly 16.34 feet long, so you can cut to fit several windows or doors. | assets: A09 | p: 2
-[x2] Each roll measures about sixteen point three four feet long and one point four inches wide, letting you cut precise lengths for each gap. | assets: A09 | p: 2
+[4] The strip is described as flexible silicone, with an approximate width of 1.4 inches and an advertised thickness of 0.19 inches. | p: 2
+[5] The three-roll package gives you separate lengths to measure and cut for different openings. The amount you need will depend on the gaps you plan to seal. | p: 2
+[6] The brand describes the silicone as flexible and designed to resist creasing or hardening during use. That is a product claim, not a result from our own testing. | p: 2
+[7] Its transparent finish is intended to be less noticeable on compatible frames, although clear material may still catch the light or remain visible. | p: 2
 
 ## features
-[6] The material is flexible, which the brand says helps it follow the contour of frames without creasing. | p: 2
-[x3] According to the brand, the silicone stays flexible and resists creasing even after repeated opening and closing of doors. | assets: A06 | p: 2
-[7] Because it’s clear, the strip aims to blend in with wood, glass, or metal surfaces, staying out of sight. | p: 2
-[x4] The adhesive backing is described as moisture-resistant, though you’ll still want a clean, dry surface for the best hold. | assets: A02 | p: 2
-[8] Adhesive backing means no screws or special hardware—just measure, cut, and press onto a clean surface. | assets: A02 | p: 2
-[x5] It’s marketed for wood, glass and metal frames, so check that your window or door material matches one of those surfaces. | assets: A03 | p: 2
+[8] The adhesive backing is intended to let you apply the strip without screws or special mounting hardware. The listed installation process is to measure, cut, and apply it to a prepared surface. | p: 2
+[9] The supplied product footage shows the roll and the clear strip being pulled out. It helps illustrate the material, but it does not establish how well the seal performs in every home. | p: 2
+[10] The product is advertised for compatible wood, glass, and metal surfaces. Check the surface and the manufacturer's instructions before applying it. | p: 2
+[11] The brand describes the adhesive as moisture-resistant for suitable applications. That should not be taken to mean it is suitable for every continuously wet area. | p: 2
 
-## in_use
-[9] When you install door draft stopper , the flap sits against the gap, creating a thin barrier rather than a bulky stopper. | p: 2
-[x6] A quick tip: wipe the area with a lint-free cloth, then let it dry before pressing the strip on. | p: 2
-[10] The hands-on footage shows a cut piece being pressed onto a window frame, the adhesive feeling tacky but not messy. | assets: A02 | p: 2
-[x7] Measure the gap first, then add a tiny margin for the flap to sit flush without compressing the frame. | p: 2
+## installation
+[12] Before installation, measure the opening and check that the strip will not interfere with a door closing or a window latch. | p: 2
+[13] One supplied clip shows a hand pressing the strip along the bottom edge of a door. This is an illustration of the application process, not a personal installation test or proof of draft reduction. | p: 2
+[14] In general, adhesive weather stripping needs a compatible, properly prepared surface. Follow the product instructions and allow the area to dry after cleaning. | p: 2
 
-## limits
-[11] The door draft stopper seal relies on a good surface; glossy glass or dusty frames can weaken the adhesive hold. | p: 2
-[x8] If the gap is deeper than the strip’s one point four inch width, you may need a thicker weather-stripping solution. | p: 2
-[12] It won’t fix damaged frames or large, irregular openings—those need more robust repairs. | p: 2
-[x9] The adhesive may struggle on glossy glass or oily surfaces, so those areas might need a different sealing method. | p: 2
-[13] Because it’s thin, a mis-cut piece could interfere with a door’s swing or a window’s latch. | p: 2
-[x10] When cutting, a sharp pair of scissors gives a clean edge, reducing the chance of the strip peeling later. | p: 2
+## limitations
+[15] Fit matters. A narrow flexible strip may not cover a gap that is too large, uneven, or irregular for its shape. | p: 2
+[16] It is also not a repair for a damaged or warped frame. Those problems may need a different weatherproofing product or a proper repair. | p: 2
+[17] Check the full movement of the door or window after planning the placement. A poorly positioned strip could affect the swing, closing, or latch. | p: 2
+[18] The adhesive's hold can depend on surface condition and compatibility. Dust, residue, or an unsuitable finish may make an adhesive-backed product a poor choice. | p: 2
 
 ## who_for
-[14] If you’re a homeowner or renter with small drafty gaps around windows, doors, or sliding doors, this could work. | p: 2
-[x11] Renters who can’t drill holes often appreciate this stick-on approach, as long as they follow the surface prep steps. | p: 2
-[15] People who prefer a low-profile, invisible solution will appreciate the transparent silicone design. | p: 2
-[x12] Homes with severely warped frames or large, irregular openings will likely need more robust repair than a thin silicone flap can provide. | p: 2
-
-## who_skip
-[16] Skip it if you have severely damaged frames, oversized gaps, or surfaces that the adhesive won’t stick to. | p: 2
-[17] Also avoid it if you need a freestanding door draft stopper or expect guaranteed energy-bill reductions. | p: 2
+[19] This may be worth considering for homeowners or renters addressing modest, suitable gaps around windows, doors, or selected sliding-door openings. | p: 2
+[20] The transparent design may appeal if you want a lower-profile alternative to a bulky draft stopper, provided the surface and gap are compatible. | p: 2
+[21] Renters should also check whether applying adhesive weather stripping is allowed on the surface or property they are using. | p: 2
 
 ## verdict
-[18] Overall, the Alien Draft Seal offers a flexible, clear strip that’s easy to cut and stick for modest gaps. | p: 1
-[19] It’s best suited for DIY winter weatherproofing where aesthetics matter, but it won’t replace proper insulation or major repairs. | p: 1
+[22] Alien Draft Seal's main appeal is straightforward: flexible transparent silicone, adhesive-backed application, and approximately 49 feet across three rolls. | p: 1
+[23] It is best viewed as a targeted weather-stripping option for suitable small gaps, not a fix for major openings or damaged frames. No specific energy-bill savings or temperature improvement is guaranteed. | p: 1
 
 ## outro
-[O1] If you liked this video, give it a like and subscribe to the channel. In the comments, tell me if you liked the Alien door Draft stopper kit. | p: 1
-[O2] I've put the product links in the video description below. | p: 1
-[O3] Thank you very much for watching the whole video. Hope to see you in the next video. Take care. | p: 1
-
-<!-- REVIEW NOTES (ignored when rendering)
-estimated length: 4.3 min; similarity to earlier scripts: 0.003
-FACT CHECK [[2]]: First-person unboxing claim not supported -> Rephrase to third-person description without personal experience
-STYLE [17]: hype phrase
--->
+[O1] If this review helped, like the video and subscribe. Let us know what type of gap you are trying to seal. | p: 1
+[O2] You can find the product link and affiliate disclosure in the description below. | p: 1
+[O3] Thanks for watching, and see you in the next video. | p: 1
