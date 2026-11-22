@@ -1,12 +1,11 @@
-# SCENES for B08S3M2HKL  (AI-generated clips, about 5 seconds each)
-# Next: run notebooks/make_ai_clips.ipynb on a free GPU (Kaggle or Colab). It writes ai_s01.mp4 ... into assets/.
-# Edit prompts freely. Keep every scene faceless and free of product-performance claims. Delete a line to skip a scene.
-# Format:  [id] type: mood|product | ref: none|photo file name | prompt: ...
-
-[s01] type: product | ref: product_image_01.jpg | prompt: Three rolls of clear silicone strip sit on a wooden table, soft ambient light grazing the transparent material. The camera orbits gently, a light sweep gliding across the rolls, creating a subtle rim glow and faint dust motes.
-[s02] type: product | ref: product_image_21.jpg | prompt: Hands from behind grasp a roll of the seal, pulling a short length toward a window frame. The camera pushes in, a soft focus on the transparent flap as a quiet light sweep highlights its flexibility.
-[s03] type: product | ref: product_image_31.jpg | prompt: A close‑up of a hand holding the silicone strip against a glass pane, the background a muted green infographic. The camera drifts left, a gentle rim light outlining the clear material, emphasizing its invisible appearance.
-[s04] type: product | ref: product_image_81.jpg | prompt: Three clear, ribbed rolls stand upright on a white surface, a soft window‑light halo surrounding them. The camera pushes in, a slow light sweep across the edges, dust particles drifting, emphasizing the product’s sleek, unobtrusive design.
-[s05] type: mood | ref: none | prompt: A sunlit living room at dusk, soft golden light spilling through a window frame. The camera drifts slowly from the floor toward the edge of the window, revealing a faint chill in the air as curtains flutter gently, suggesting winter outside.
-[s06] type: mood | ref: none | prompt: Close‑up of a wooden door edge, light grazing the surface, dust particles floating. The camera pushes in toward the seam where a faint draft might slip, emphasizing the quiet stillness of a home preparing for cold weather.
-[s07] type: mood | ref: none | prompt: A quiet hallway with a sliding glass door partially open, soft light spilling onto the floorboards. The camera slowly pushes toward the door’s edge, highlighting the narrow space where cold air could enter.
+# SCENES for B08S3M2HKL
+# These scenes use only existing files in assets/. No AI-generated or external footage is required.
+# The ref field accepts one or more existing filenames separated by semicolons.
+# Format: [id] type: mood|product | ref: none|filename; filename | prompt: ...
+[s01] type: product | ref: 2026-10-23 17-27-34 - Trim.mp4; product_image_01.jpg | prompt: Opening product overview. Use the supplied package-and-roll footage with the matching product image to establish the Alien Draft Seal and the three-roll package.
+[s02] type: product | ref: 2026-10-23 17-27-34 - Trim10.mp4; product_image_61.jpg | prompt: Show the clear strip being pulled from the roll, followed by the supplied cut-to-size product graphic. Keep the focus on the material and measuring or cutting context.
+[s03] type: product | ref: 2026-10-23 17-27-34 - Trim5.mp4 | prompt: Product detail beat. Use the close product footage to show the transparent strip. Avoid displaying promotional claims as verified performance results.
+[s04] type: product | ref: 2026-10-23 17-27-34 - Trim7.mp4; product_image_51.jpg | prompt: Installation illustration. Show the supplied hand pressing the strip along a door edge, paired with the existing peel-and-stick instruction image. Do not imply creator testing.
+[s05] type: mood | ref: 2026-10-23 17-27-34 - Trim8.mp4 | prompt: Close view of the door bottom and installed strip from the supplied footage. Use as a visual example of placement only; do not imply a measured reduction in drafts.
+[s06] type: mood | ref: 2026-10-23 17-27-34 - Trim9.mp4; 2026-10-23 17-27-34 - Trim2.mp4; 2026-10-23 17-27-34 - Trim6.mp4 | prompt: Use the supplied close-up of the strip at the door edge, then supporting product footage to discuss fit, surface compatibility, and limitations. Avoid claims about proven sealing performance.
+[s07] type: product | ref: 2026-10-23 17-27-34 - Trim3.mp4; 2026-10-23 17-27-34 - Trim4.mp4; product_image_81.jpg | prompt: Closing product recap. Use the remaining supplied package footage and clean product image as a restrained end card visual, with no unsupported claims or added promotional text.
