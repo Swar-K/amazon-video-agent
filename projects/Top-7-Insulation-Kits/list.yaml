@@ -32,7 +32,6 @@ products:                      # YOUR ranking: #1 is the first line
     best_for: "Who need to seal gap under door, door gap blocker"
   - id: B0CDLVYCJV
     best_for: "who need door sweep for bugs and drafts, under door seal for insects"
-  - Top-7-Insulation-Kits                         # a plain product folder name also works
 order: countdown               # countdown = show #N first and #1 last (usual)  |  ascending = #1 first
 criteria: "I ranked these by how useful they were to use on a winter days and how easy they were to keep all year long, based on my own notes."
 category: "Home Improvement"
