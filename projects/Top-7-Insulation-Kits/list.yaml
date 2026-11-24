@@ -19,19 +19,19 @@ keywords:                      # phrases viewers search for (5-15 is plenty; the
 products:                      # YOUR ranking: #1 is the first line
   - id: B0DK5XXVTX
     label: "Best air sealing"            # optional, your own words for this pick (no price words)
-    best_for: "air sealing"       # optional: who it suits
+    best_for: "who needs air sealing their home"       # optional: who it suits
   - id: B00G7009LM
-    best_for: "draft guard"
-    - id: B00002NCJI
-    best_for: "plastic to cover windows "
-    - id: B08S3M2HKL
+    best_for: "who need draft guard around windows"
+  - id: B00002NCJI
+    best_for: "who need plastic to cover windows"
+  - id: B08S3M2HKL
     best_for: "Best all-round"
-    - id: B0BWN2GKT6
-    best_for: "door stopper in usa"
-    - id: B0D59ZRWLW
-    best_for: "seal gap under door, door gap blocker"
-    - id: B0CDLVYCJV
-    best_for: "door sweep for bugs and drafts, under door seal for insects"
+  - id: B0BWN2GKT6
+    best_for: "Whom are looking for door stopper in usa"
+  - id: B0D59ZRWLW
+    best_for: "Who need to seal gap under door, door gap blocker"
+  - id: B0CDLVYCJV
+    best_for: "who need door sweep for bugs and drafts, under door seal for insects"
   - Top-7-Insulation-Kits                         # a plain product folder name also works
 order: countdown               # countdown = show #N first and #1 last (usual)  |  ascending = #1 first
 criteria: "I ranked these by how useful they were to use on a winter days and how easy they were to keep all year long, based on my own notes."
