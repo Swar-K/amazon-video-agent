@@ -7,33 +7,19 @@
 # 4. Run Make video with  mode: script  and this folder name, edit script.md, then  mode: render.
 # The ranking is YOUR decision. The video presents it as "my pick", never as a test result or a sales ranking.
 # ------------------------------------------------------------------
-title: "Top 7 window-door seal for cold weather"
+title: "Top 5 cooling towels for hot weather"
 keywords:                      # phrases viewers search for (5-15 is plenty; the first one goes into the title)
-  - under door foam
-  - best under door blocker
-  - door draft stopper for home
-  - keep bugs out
-  - seal door gap
-  - stop hot and cold air
-  - Draft stopper for windows and doors
+  - cooling towel
+  - best cooling towels
+  - cooling towel for gym
 products:                      # YOUR ranking: #1 is the first line
-  - id: B0DK5XXVTX
-    label: "Best air sealing"            # optional, your own words for this pick (no price words)
-    best_for: "air sealing"       # optional: who it suits
-  - id: B00G7009LM
-    best_for: "draft guard"
-    - id: B00002NCJI
-    best_for: "plastic to cover windows "
-    - id: B08S3M2HKL
-    best_for: "Best all-round"
-    - id: B0BWN2GKT6
-    best_for: "door stopper in usa"
-    - id: B0D59ZRWLW
-    best_for: "seal gap under door, door gap blocker"
-    - id: B0CDLVYCJV
-    best_for: "door sweep for bugs and drafts, under door seal for insects"
-  - Top-7-Insulation-Kits                         # a plain product folder name also works
+  - id: B0DN5N1FL5
+    label: "Best all-round"            # optional, your own words for this pick (no price words)
+    best_for: "hot gym sessions"       # optional: who it suits
+  - id: B082HNFVVZ
+    best_for: "long outdoor days"
+  - B0XXXXXXX3                         # a plain product folder name also works
 order: countdown               # countdown = show #N first and #1 last (usual)  |  ascending = #1 first
-criteria: "I ranked these by how useful they were to use on a winter days and how easy they were to keep all year long, based on my own notes."
-category: "Home Improvement"
-audience: "people who need window-door seal in this winter season"
+criteria: "I ranked these by how comfortable they were to use on a hot day and how easy they were to keep wet, based on my own notes."
+category: "cooling towels"
+audience: "people who exercise or work in the heat"
