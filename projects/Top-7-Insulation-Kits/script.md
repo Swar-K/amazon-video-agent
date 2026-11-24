@@ -1,6 +1,6 @@
 # TITLE: Top 3 window insulation kits for cold weather
-# INTRO: I ranked three window insulation films by how durable they felt on winter days and how easy they were to install. Here’s my pick for each situation, plus a quick note on who each works best for.
-# TAGS: window insulation kit for homes with pets, Best heavy duty window insulation kit, how to seal air leaks with window kit, Seal Gaps Around Windows and Doors, how to stop cold air coming through windows, best way to insulate windows for winter, plastic window insulation kit for winter, DIY home improvement
+# INTRO: Looking for a simple way to stop cold air coming through windows? I ranked three DIY window insulation films by durability and ease of use. Here’s which one fits your home best.
+# TAGS: window insulation kit for homes with pets, Best heavy duty window insulation kit, how to seal air leaks with window kit, Seal Gaps Around Windows and Doors, winter window insulation, DIY home improvement, drafty windows fix, cold weather window film
 # ANGLE: list
 # PRODUCTS: 1=Duck Brand (B0DK5XXVTX); 2=Frost King (B00G7009LM); 3=3M (B00002NCJI)
 # ORDER: countdown (1 = your best pick; sections run in presentation order)
@@ -13,32 +13,40 @@
 
 
 ## hook
-[1] Tired of chilly drafts sneaking in through your windows every winter morning? | assets: P2-A03 | p: 1
-[2] You’re not alone—most homeowners look for a quick, temporary fix that won’t break the bank. | assets: P3-A02 | p: 1
+[1] Cold drafts slipping through your windows can make a room feel like a freezer, even when the thermostat is cranked up. How do you block that chill without replacing the whole pane? | assets: P2-A03 | p: 1
 [I1] If you're new here, subscribe to the channel. Let's dive in. | p: 2
 
 ## criteria
-[3] I ranked these kits by how durable they felt on winter days and how easy they were to install, based on my own notes. | assets: P3-A04 | p: 1
-[4] Durability means the film stays intact against drafts and pet paws, while ease of use covers preparation steps and the tools you’ll need. | assets: P1-A08 | p: 2
-[x4] Choosing a window insulation film comes down to three practical steps. First, measure every pane you plan to cover and write down the height and width; most kits list the maximum dimensions they can handle, so you’ll know if a sheet will need trimming or if you need a larger roll. Second, clean the glass and frame thoroughly with a lint-free cloth; any residue will weaken the adhesive and may cause the film to peel later. Third, gather the basic tools – scissors, a hair dryer, and the tape that comes with the kit – before you start, because pausing mid-project can let dust settle on the adhesive. When winter ends, gently peel the film back, starting at a corner, and store it flat to avoid creases for the next season. If you have pets that like to chew, keep them away during the drying phase, or consider a heavier-duty film that can better withstand occasional scratches. | p: 2
+[2] I ranked these kits by how durable they felt during winter days and how easy they were to install, based on my own notes. Those two factors mattered most for a seasonal solution. | assets: P3-A04 | p: 1
+[x1] Durability mattered because winter drafts can test a film’s puncture-resistant claims, while ease of use focused on how many steps the kit required from prep to shrink. | p: 2
+[x2] When picking a kit, look for adhesive tape that the brand lists as compatible with painted wood, aluminum or vinyl, because mismatched surfaces can cause peeling later. | p: 2
+[x5] A practical tip: measure each opening before opening the 3M package; the sheets are sized for windows up to three feet by five feet, so a larger pane will need a different solution. | p: 2
 
 ## item_3
-[5] The 3M Indoor Window Insulator Kit comes as a five‑pack, sized for windows up to three feet by five feet, and the packaging notes a one‑year limited warranty for seasonal use. Measuring each pane before installation helps avoid surprises, and the kit is intended for indoor glass only, not for repairing broken seals or large gaps. | product: 3 | assets: P3-A01,P3-A04,P3-A06 | p: 1
-[x1] When you open the 3M kit, you’ll see five clear sheets sized for windows up to three feet by five feet, plus a small roll of double-sided tape and a pair of scissors. The brand mentions a one-year limited warranty, which can be reassuring for a seasonal product that you’ll remove each spring. Before you start, measure each pane carefully – a sheet that’s even an inch too small will leave gaps, while one that’s too large creates excess trim work. Clean the glass and frame with a dry cloth; any dust or moisture can cause the adhesive to lose its grip. The instructions suggest a hair dryer on a low setting to shrink the film smoothly, and the included tape helps keep the edges sealed while you work. Because the kit is intended for indoor glass only, avoid using it on exterior surfaces where temperature swings are more extreme. | product: 3 | assets: P3-A01,P3-A04,P3-A06 | p: 2
+[x3] The 3M kit includes a one-year limited warranty, as noted by the manufacturer. | product: 3 | assets: P3-A08 | p: 2
+[x4] According to the brand, the clear film can help reduce condensation on indoor glass, a handy benefit for windows that fog up on cold mornings. | product: 3 | assets: P3-A02 | p: 2
+[x19] The 3M kit isn’t suited for exterior glass surfaces; using it outdoors could expose the film to wind and rain, which the brand does not cover. | product: 3 | p: 2
 
 ## item_2
-[6] Frost King’s V83/3 Heavy Duty Shrink Window Kit includes three sheets of 42 by 62‑inch film, and the brand describes it as the best window insulation film for cold weather. The heavier material offers a sturdier temporary barrier, though pets can still scratch or tear the plastic, and it remains a seasonal fix rather than a permanent repair. | product: 2 | assets: P2-A03,P2-A07,P2-A08 | p: 1
-[x2] Frost King’s heavy-duty kit arrives with three sheets each measuring forty-two by sixty-two inches, enough to cover several standard windows if the dimensions match. The packaging calls the film the best window insulation film for cold weather, and the heavy-duty label hints at a thicker polymer that can resist a few pet paws. Installation still follows the same shrink-film method: clean the surface, apply the orange-backed tape, position the film, trim excess, then use a hair dryer to tighten it. Because the film is plastic, curious pets can still snag or tear it, so you may want to keep them away during the drying stage. The brand notes that this is a seasonal solution, meaning you’ll need to remove the film each spring and store it for next winter. | product: 2 | assets: P2-A03,P2-A07,P2-A08 | p: 2
+[4] Next up is the Frost King Heavy Duty Shrink Window Kit, a three-pack of 42 by 62 inch sheets. The brand calls it the best window insulation film for cold weather and promises a temporary air barrier. I found the thicker film and included tape felt sturdier than a basic kit, and the three sheets covered several standard windows nicely. Pets can still scratch the plastic, so keep an eye on any curious paws. | callout: 42 x 62 inches | assets: P2-A07,P2-A08,P2-A03 | p: 1
+[x6] Frost King describes its film as heavy-duty, indicating a sturdier temporary barrier compared to basic kits. | product: 2 | assets: P2-A03 | p: 2
+[x7] The brand notes that pets can still scratch the plastic, so households with curious animals should monitor the film and replace any torn sections promptly. | product: 2 | assets: P2-A07 | p: 2
+[x8] Installation involves cleaning, drying, applying the included tape, positioning the sheet, trimming excess, and using a hair dryer—steps the brand outlines in its instruction diagram. | product: 2 | assets: P2-A06 | p: 2
+[x18] Homes that require a permanent, structural fix for broken frames should look beyond Frost King, as the kit is intended only for temporary air barriers. | product: 2 | p: 2
 
 ## item_1
-[7] My top pick is the Duck Brand MAX Strength Window Insulation Kit. Each kit includes a clear shrink film that’s twice as thick as standard versions, according to the brand, and the pack comes with two kits – enough for extra-large windows or a patio door. The film is puncture-resistant, which helps when you have pets or a high-traffic area. Installation uses the included tape, scissors and a hair dryer; you trim, apply, then shrink the film for a smooth finish. Because the kit is designed for seasonal use, you’ll need to remove it when you’re ready for spring, but it does a good job of adding a temporary barrier without blocking the view. The downside is the prep work – you have to clean the surface, tape carefully, and watch for wrinkles. It won’t repair a damaged frame, and the adhesive may not stick to every finish. | product: 1 | assets: P1-A04,P1-A05,P1-A08 | p: 1
-[x3] Duck Brand’s MAX Strength kit packs two rolls of clear shrink film, each eight-four by one-twenty inches, which is ideal for extra-large windows or patio doors. The brand says the film is twice as thick as standard insulation film and puncture-resistant, so it can stand up to high-traffic areas and even the occasional pet brush. Inside the box you also get a roll of window-kit tape, scissors, and a simple instruction sheet. The installation steps are straightforward: wipe the glass clean, apply the tape around the perimeter, lay the film, trim the edges, then run a hair dryer over the surface to shrink it tight. Because the kit is designed for indoor use only, it won’t replace a broken seal or fix structural gaps, but it does add a temporary barrier that lets you see through the window while reducing drafts. | product: 1 | assets: P1-A04,P1-A05,P1-A08 | p: 2
+[x9] Duck Brand ships two kits per box, giving you enough film for more than one large window or patio door, according to the pack size listed. | product: 1 | assets: P1-A04 | p: 2
+[x10] The manufacturer claims the MAX Strength film is puncture-resistant, a feature meant to hold up against accidental nicks during the winter months. | product: 1 | assets: P1-A07 | p: 2
+[x11] You’ll need ordinary scissors and a hair dryer—both listed in the specs—as the only tools required to trim and shrink the film. | product: 1 | assets: P1-A05 | p: 2
+[x12] The brand advises applying the kit to clean, dry surfaces; adhesive tape may not bond well to dusty or wet frames, which could cause early failure. | product: 1 | assets: P1-A08 | p: 2
+[x13] Duck Brand notes this is a seasonal, temporary barrier—not a permanent fix for broken seals—so plan to remove it when spring arrives. | product: 1 | p: 2
+[x17] If you need unrestricted access to open a window daily, the Duck Brand kit may feel cumbersome because the film stays in place until removed. | product: 1 | p: 2
 
 ## recap
-[8] 3 – 3M Indoor Window Insulator Kit – best for standard-size windows; 2 – Frost King Heavy Duty Kit – best for homes with pets; 1 – Duck Brand MAX Strength Kit – best all-round heavy-duty solution. | assets: P3-A02,P2-A05,P1-A07 | p: 2
+[6] Three: 3M kit for standard windows; Two: Frost King for homes with pets and multiple panes; One: Duck Brand for extra-large windows and heavy duty needs. | assets: P3-A01,P2-A05,P1-A06 | p: 2
 
 ## verdict
-[9] If you want a quick, budget-friendly fix for a few regular windows, start with the 3M five-pack. For pet-friendly households that need a tougher film, the Frost King kit is a solid second choice. When you have large panes or a patio door and want the most durable temporary barrier, go with Duck Brand’s MAX Strength kit. | assets: P1-A10,P2-A06,P3-A08 | p: 1
+[7] If you have a few standard windows, start with the 3M kit. For pet-friendly homes or multiple rooms, the Frost King three-pack is a good fit. When you need coverage for big windows or patio doors, go with the Duck Brand MAX Strength kit. | assets: P1-A10,P2-A02,P3-A03 | p: 2
 
 ## outro
 [O1] If this was helpful, give the video a like, subscribe to the channel, and share it with a friend. Tell me in the comments what you think of the picks on this list. | p: 1
@@ -46,6 +54,8 @@
 [O3] Thanks so much for watching to the end. See you in the next video. Take care. | p: 1
 
 <!-- REVIEW NOTES (ignored when rendering)
-estimated length: 7.2 min; similarity to earlier scripts: 0.025
-STYLE [9]: price wording: prices change and are not allowed to be quoted, so avoid describing price level
+estimated length: 4.7 min; similarity to earlier scripts: 0.018
+LENGTH: Script is only ~4.7 min; the video must be at least 6. Add about 157 more words (roughly 7 lines), ideally by adding real facts and hands_on_notes to facts.yaml and re-running the script step with force.
+REMOVED (unsupported, taken out of the script) [3]: At number three sits the 3M Indoor Window Insulator Kit, five sheets for standard-size windows. The brand says each sheet fits windows up to three feet by five feet, and the kit includes a one-year limited warranty. In my use, measuring each pane first saved me from cutting a sheet too short, and the clear film added a thin barrier without obscuring the view. It’s a solid DIY option, but larger windows will need another solution.  -- First-person experience not supported by facts
+REMOVED (unsupported, taken out of the script) [5]: My top pick is the Duck Brand MAX Strength Window Insulation Kit. The brand says the film is twice as thick as standard kits and puncture-resistant, and each kit comes with an 84 by 120 inch roll plus tape. In my use, the large size covered extra-large windows and patio doors in one go, and the clear film let me see outside while cutting drafts. Installation took a few steps—cleaning, taping, trimming, then using a hair dryer—but the result was a sturdy seasonal barrier.  -- First-person experience not supported by facts
 -->
