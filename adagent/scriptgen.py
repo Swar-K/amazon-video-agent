@@ -209,12 +209,21 @@ def facts_yaml(project: Project) -> str:
 
 
 def assets_block(entries: list[dict]) -> str:
-    lines = []
+    """Keep the script prompt compact while preserving useful footage choices per product."""
+    lines, counts = [], {}
     for e in entries:
-        if e["usable"]:
-            extra = f", {e['duration']:.0f}s" if e["kind"] == "clip" else ""
-            who = f" ({e['label']})" if e.get("label") else ""
-            lines.append(f"{e['id']} [{e['kind']}{extra}]{who} {e['description']}")
+        if not e.get("usable"):
+            continue
+        product = str(e.get("product", "1"))
+        if counts.get(product, 0) >= 4:
+            continue
+        counts[product] = counts.get(product, 0) + 1
+        extra = f", {e['duration']:.0f}s" if e["kind"] == "clip" else ""
+        who = f" ({e['label']})" if e.get("label") else ""
+        description = re.sub(r"\s+", " ", str(e.get("description") or "")).strip()
+        if len(description) > 100:
+            description = description[:97].rsplit(" ", 1)[0] + "..."
+        lines.append(f"{e['id']} [{e['kind']}{extra}]{who} {description}")
     return "\n".join(lines) or "(none)"
 
 
