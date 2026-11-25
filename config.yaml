@@ -117,7 +117,7 @@ llm:
   auto_fallbacks: true    # when those are used up too, also try every other suitable model your Groq account offers (each has its own daily quota)
   text_fallbacks:         # the same idea for writing the script
     - openai/gpt-oss-20b
-    - qwen/qwen3-32b
+    - qwen/qwen3.8-27b
   groq_max_tokens: 4000
   vision_providers: [groq, gemini, mistral, openrouter]  # ordered failover; each provider is tried when the previous one errors or is rate/quota limited
   vision_provider_models:
