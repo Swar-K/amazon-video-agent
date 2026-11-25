@@ -118,7 +118,7 @@ llm:
   text_fallbacks:         # the same idea for writing the script
     - openai/gpt-oss-20b
     - qwen/qwen3-32b
-  groq_max_tokens: 6500
+  groq_max_tokens: 4000
   vision_providers: [groq, gemini, mistral, openrouter]  # ordered failover; each provider is tried when the previous one errors or is rate/quota limited
   vision_provider_models:
     gemini: gemini-3.8-flash
