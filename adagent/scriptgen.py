@@ -173,8 +173,34 @@ _FACT_KEYS = ["product_name", "brand", "category", "audience", "keywords", "manu
               "hands_on_notes", "pros", "cons", "not_for", "use_cases", "notes"]
 
 
-def _facts_one(f: dict) -> str:
+def _facts_one(f: dict, compact: bool = False) -> str:
     d = {k: f[k] for k in _FACT_KEYS if f.get(k)}
+    if compact:
+        # Top-N prompts combine 3-9 product sheets. Keep the facts needed to
+        # describe and rank each item, but omit long editorial/SEO notes that
+        # otherwise push the whole request beyond smaller model TPM limits.
+        limits = {
+            "manufacturer_claims": 4, "specs": 6, "hands_on_notes": 4,
+            "pros": 4, "cons": 3, "not_for": 2, "use_cases": 3,
+        }
+        d.pop("notes", None)
+        for key, limit in limits.items():
+            value = d.get(key)
+            if isinstance(value, list):
+                d[key] = [str(x)[:240] for x in value[:limit]]
+        if isinstance(d.get("audience"), str):
+            d["audience"] = d["audience"][:220]
+        keywords = d.get("keywords")
+        if isinstance(keywords, list):
+            d["keywords"] = [str(x)[:100] for x in keywords[:8]]
+        elif isinstance(keywords, dict):
+            flat = []
+            for value in keywords.values():
+                if isinstance(value, list):
+                    flat.extend(str(x)[:100] for x in value)
+                elif value:
+                    flat.append(str(value)[:100])
+            d["keywords"] = flat[:8]
     return yaml.safe_dump(d, sort_keys=False, allow_unicode=True, width=1000)
 
 
@@ -196,7 +222,7 @@ def facts_yaml(project: Project) -> str:
                 if c["best_for"][i - 1]:
                     head += f"; best_for: {c['best_for'][i - 1]}"
                 head += f"; hands_on_notes: {len(sub.facts.get('hands_on_notes') or [])}"
-            parts.append(head + f")\n{_facts_one(sub.facts)}")
+            parts.append(head + f")\n{_facts_one(sub.facts, compact=(c['kind'] == 'list'))}")
         extra = {k: project.facts[k] for k in ("compare_points", "notes") if project.facts.get(k)}
         if extra:
             parts.append("COMPARISON NOTES\n" + yaml.safe_dump(extra, sort_keys=False, allow_unicode=True, width=1000))
@@ -209,12 +235,21 @@ def facts_yaml(project: Project) -> str:
 
 
 def assets_block(entries: list[dict]) -> str:
-    lines = []
+    """Keep the script prompt compact while preserving useful footage choices per product."""
+    lines, counts = [], {}
     for e in entries:
-        if e["usable"]:
-            extra = f", {e['duration']:.0f}s" if e["kind"] == "clip" else ""
-            who = f" ({e['label']})" if e.get("label") else ""
-            lines.append(f"{e['id']} [{e['kind']}{extra}]{who} {e['description']}")
+        if not e.get("usable"):
+            continue
+        product = str(e.get("product", "1"))
+        if counts.get(product, 0) >= 3:
+            continue
+        counts[product] = counts.get(product, 0) + 1
+        extra = f", {e['duration']:.0f}s" if e["kind"] == "clip" else ""
+        who = f" ({e['label']})" if e.get("label") else ""
+        description = re.sub(r"\s+", " ", str(e.get("description") or "")).strip()
+        if len(description) > 100:
+            description = description[:97].rsplit(" ", 1)[0] + "..."
+        lines.append(f"{e['id']} [{e['kind']}{extra}]{who} {description}")
     return "\n".join(lines) or "(none)"
 
 

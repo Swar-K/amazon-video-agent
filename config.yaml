@@ -117,8 +117,13 @@ llm:
   auto_fallbacks: true    # when those are used up too, also try every other suitable model your Groq account offers (each has its own daily quota)
   text_fallbacks:         # the same idea for writing the script
     - openai/gpt-oss-20b
-    - qwen/qwen3-32b
-  groq_max_tokens: 6500
+    - qwen/qwen3.8-27b
+  groq_max_tokens: 4000
+  vision_providers: [groq, gemini, mistral, openrouter]  # ordered failover; each provider is tried when the previous one errors or is rate/quota limited
+  vision_provider_models:
+    gemini: gemini-3.8-flash
+    mistral: mistral-small-2506
+    openrouter: google/gemini-3.8-flash
   vision_check: true      # false = skip the AI photo check (saves Groq tokens; you then check faces/prices yourself)
   vision_max_side: 640    # photos are shrunk to this size for the AI check (cheaper; the product is still clearly visible)                            # keeps requests inside free-tier per-minute limits
   # For Anthropic instead: provider: anthropic, model: claude-sonnet-5-5, vision_model: claude-sonnet-5-5
