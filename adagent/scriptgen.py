@@ -215,7 +215,7 @@ def assets_block(entries: list[dict]) -> str:
         if not e.get("usable"):
             continue
         product = str(e.get("product", "1"))
-        if counts.get(product, 0) >= 4:
+        if counts.get(product, 0) >= 3:
             continue
         counts[product] = counts.get(product, 0) + 1
         extra = f", {e['duration']:.0f}s" if e["kind"] == "clip" else ""
