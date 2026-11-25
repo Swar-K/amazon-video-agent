@@ -222,7 +222,7 @@ def facts_yaml(project: Project) -> str:
                 if c["best_for"][i - 1]:
                     head += f"; best_for: {c['best_for'][i - 1]}"
                 head += f"; hands_on_notes: {len(sub.facts.get('hands_on_notes') or [])}"
-            parts.append(head + f")\n{_facts_one(sub.facts, compact=(c["kind"] == "list"))}")
+            parts.append(head + f")\n{_facts_one(sub.facts, compact=(c['kind'] == 'list'))}")
         extra = {k: project.facts[k] for k in ("compare_points", "notes") if project.facts.get(k)}
         if extra:
             parts.append("COMPARISON NOTES\n" + yaml.safe_dump(extra, sort_keys=False, allow_unicode=True, width=1000))
