@@ -222,9 +222,155 @@ def _ask_anthropic(model, system, user, images, max_tokens, temperature) -> str:
     raise RuntimeError(f"Anthropic API failed: {last}")
 
 
+
+# -------------------------- Multi-provider vision --------------------------
+def _vision_images(images: list[np.ndarray]) -> list[str]:
+    return [jpeg_b64(im, int(_llm_cfg().get("vision_max_side", 640))) for im in images]
+
+
+def _response_text(data: dict) -> str:
+    try:
+        content = data["choices"][0]["message"]["content"]
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            return "".join(p.get("text", "") for p in content if isinstance(p, dict))
+    except (KeyError, IndexError, TypeError):
+        pass
+    raise RuntimeError("Vision provider returned an empty or unrecognized response.")
+
+
+def _ask_openai_compatible_vision(provider: str, model: str, system: str, user: str,
+                                  images: list[np.ndarray], max_tokens: int, temperature: float) -> str:
+    env_name, endpoint = {
+        "mistral": ("MISTRAL_API_KEY", "https://api.mistral.ai/v1/chat/completions"),
+        "openrouter": ("OPENROUTER_API_KEY", "https://openrouter.ai/api/v1/chat/completions"),
+    }[provider]
+    key = os.environ.get(env_name)
+    if not key:
+        raise RuntimeError(f"{env_name} is not set; skipping {provider} vision.")
+    content = [{"type": "text", "text": system + "\n\n" + user}]
+    for encoded in _vision_images(images):
+        content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + encoded}})
+    body = {
+        "model": model,
+        "messages": [{"role": "user", "content": content}],
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "response_format": {"type": "json_object"},
+    }
+    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    if provider == "openrouter":
+        headers["X-Title"] = "Amazon Video Agent"
+    last = ""
+    for attempt in range(2):
+        try:
+            r = requests.post(endpoint, headers=headers, json=body, timeout=180)
+            if r.status_code == 200:
+                return _response_text(r.json())
+            last = f"HTTP {r.status_code}: {r.text[:400]}"
+            if r.status_code < 500 and r.status_code != 429:
+                break
+            time.sleep(2 + attempt * 3)
+        except requests.RequestException as e:
+            last = str(e)
+            time.sleep(2 + attempt * 3)
+    raise RuntimeError(f"{provider} vision request failed ({last}).")
+
+
+def _ask_gemini_vision(model: str, system: str, user: str, images: list[np.ndarray],
+                       max_tokens: int, temperature: float) -> str:
+    key = os.environ.get("GEMINI_API_KEY")
+    if not key:
+        raise RuntimeError("GEMINI_API_KEY is not set; skipping Gemini vision.")
+    parts = [{"text": system + "\n\n" + user}]
+    for encoded in _vision_images(images):
+        parts.append({"inlineData": {"mimeType": "image/jpeg", "data": encoded}})
+    body = {
+        "contents": [{"role": "user", "parts": parts}],
+        "generationConfig": {
+            "temperature": temperature,
+            "maxOutputTokens": max_tokens,
+            "responseMimeType": "application/json",
+        },
+    }
+    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    last = ""
+    for attempt in range(2):
+        try:
+            r = requests.post(endpoint, headers={"x-goog-api-key": key, "Content-Type": "application/json"},
+                              json=body, timeout=180)
+            if r.status_code == 200:
+                data = r.json()
+                try:
+                    return "".join(p.get("text", "") for p in data["candidates"][0]["content"]["parts"])
+                except (KeyError, IndexError, TypeError):
+                    raise RuntimeError("Gemini returned no text content.")
+            last = f"HTTP {r.status_code}: {r.text[:400]}"
+            if r.status_code < 500 and r.status_code != 429:
+                break
+            time.sleep(2 + attempt * 3)
+        except requests.RequestException as e:
+            last = str(e)
+            time.sleep(2 + attempt * 3)
+    raise RuntimeError(f"Gemini vision request failed ({last}).")
+
+
+def _ask_groq_vision_chain(model: str, system: str, user: str, images: list[np.ndarray],
+                           max_tokens: int, temperature: float) -> str:
+    if not os.environ.get("GROQ_API_KEY"):
+        raise RuntimeError("GROQ_API_KEY is not set; skipping Groq vision.")
+    chain = [model] + [x for x in (_llm_cfg().get("vision_fallbacks") or []) if x != model]
+    ok, out, last = _try_models(chain, system, user, images, max_tokens, temperature, daily_seen=False)
+    if ok:
+        return out
+    if _llm_cfg().get("auto_fallbacks", True) and any(x in _exhausted for x in chain):
+        extra = _auto_candidates("vision", set(chain))
+        if extra:
+            log(f"  Also trying other vision models from your Groq account: {', '.join(extra)}")
+            ok, out, last2 = _try_models(extra, system, user, images, max_tokens, temperature, daily_seen=True)
+            if ok:
+                return out
+            last = last or last2
+    raise DailyLimitError(f"Groq vision models are unavailable or exhausted ({', '.join(chain)}). {last or ''}")
+
+
+def _ask_vision_with_provider_failover(model: str, system: str, user: str, images: list[np.ndarray],
+                                       max_tokens: int, temperature: float) -> str:
+    cfg = _llm_cfg()
+    providers = cfg.get("vision_providers") or ["groq", "gemini", "mistral", "openrouter"]
+    models = cfg.get("vision_provider_models") or {}
+    errors = []
+    for provider in providers:
+        provider = str(provider).lower()
+        provider_model = models.get(provider)
+        if not provider_model:
+            errors.append(f"{provider}: no model configured")
+            continue
+        try:
+            log(f"  Vision provider: {provider} ({provider_model})")
+            if provider == "groq":
+                return _ask_groq_vision_chain(model, system, user, images, max_tokens, temperature)
+            if provider == "gemini":
+                return _ask_gemini_vision(provider_model, system, user, images, max_tokens, temperature)
+            if provider in ("mistral", "openrouter"):
+                return _ask_openai_compatible_vision(provider, provider_model, system, user,
+                                                     images, max_tokens, temperature)
+            errors.append(f"{provider}: unsupported provider")
+        except Exception as e:
+            errors.append(f"{provider}: {str(e)[:220]}")
+            log(f"  {provider} vision failed; falling back to the next provider ({str(e)[:160]}).")
+    raise RuntimeError("All configured vision providers failed. " + " | ".join(errors))
+
+
 def ask(model: str, system: str, user: str, images: list[np.ndarray] | None = None,
         max_tokens: int = 8000, temperature: float = 0.8) -> str:
-    if _llm_cfg().get("provider", "groq") != "groq":
+    if images:
+        if _llm_cfg().get("vision_providers"):
+            return _ask_vision_with_provider_failover(model, system, user, images, max_tokens, temperature)
+        if _llm_cfg().get("provider", "groq") != "groq":
+            return _ask_anthropic(model, system, user, images, max_tokens, temperature)
+    elif _llm_cfg().get("provider", "groq") != "groq":
         return _ask_anthropic(model, system, user, images, max_tokens, temperature)
     # Groq: when a model's DAILY quota is gone, move on to the next model listed under llm.vision_fallbacks /
     # llm.text_fallbacks in config.yaml (every model has its own daily quota).
