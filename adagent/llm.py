@@ -21,6 +21,10 @@ class DailyLimitError(RuntimeError):
     """Groq's per-day quota for a model is used up. Waiting a minute will not help, so callers fail over or stop at once."""
 
 
+class RequestTooLargeError(RuntimeError):
+    """A single request cannot fit the model's current per-minute token budget."""
+
+
 _exhausted: set = set()   # models whose daily quota ran out during this run (skipped on later calls)
 
 
@@ -168,18 +172,26 @@ def _ask_groq(model, system, user, images, max_tokens, temperature) -> str:
             body.pop("response_format")  # model without JSON mode: our parser copes with plain text
             continue
         if r.status_code in (413, 429) and "request too large" in r.text.lower():
-            # Not a "wait a minute" problem: this single request is bigger than the per-minute limit allows.
+            # TPM accounting includes both the prompt and the requested completion budget.
             m = re.search(r"limit\s+(\d+),\s*requested\s+(\d+)", r.text, re.I)
-            if m and ("output tokens" in r.text.lower() or "max_tokens" in r.text.lower()):
+            if m and ("tokens per minute" in r.text.lower() or "tpm" in r.text.lower()
+                      or "output tokens" in r.text.lower() or "max_tokens" in r.text.lower()):
                 limit, req = int(m.group(1)), int(m.group(2))
-                new = max(200, int(body["max_tokens"] * limit / max(req, 1) * 0.8))
-                if new < body["max_tokens"]:
-                    log(f"  Request exceeds {body['model']}'s output-tokens/minute limit ({limit}); "
-                        f"lowering max_tokens {body['max_tokens']} -> {new} and retrying.")
-                    body["max_tokens"] = new
+                prompt_estimate = max(0, req - int(body["max_tokens"]))
+                reserve = max(256, int(limit * 0.04))
+                available = limit - prompt_estimate - reserve
+                if 256 <= available < body["max_tokens"]:
+                    log(f"  Request exceeds {body['model']}'s TPM budget ({limit}); "
+                        f"prompt estimate {prompt_estimate}, reducing max_tokens "
+                        f"{body['max_tokens']} -> {available} and retrying.")
+                    body["max_tokens"] = available
                     continue
-            raise RuntimeError(f"Groq says this single request is too large for {body['model']}'s per-minute "
-                               f"token limit, so waiting will not help. {last}")
+                raise RequestTooLargeError(
+                    f"Request cannot fit {body['model']}'s per-minute token budget ({limit} TPM): "
+                    f"prompt estimate {prompt_estimate} tokens leaves only {max(0, available)} output tokens. "
+                    "The prompt must be shortened or another model/provider used. " + last)
+            raise RequestTooLargeError(f"Groq says this single request is too large for {body['model']}'s "
+                                       f"per-minute token limit. " + last)
         if r.status_code == 429 and re.search(r"tokens per day|\(TPD\)|requests per day|\(RPD\)|per day", r.text, re.I):
             m = re.search(r"Limit (\d+), Used (\d+), Requested (\d+)", r.text)
             detail = f" ({int(m.group(2)):,} of {int(m.group(1)):,} used today)" if m else ""
@@ -388,7 +400,7 @@ def ask(model: str, system: str, user: str, images: list[np.ndarray] | None = No
                 return out
             chain = chain + extra
             last = last or last2
-    if len(chain) == 1 and last is not None:
+    if last is not None and not any(x in _exhausted for x in chain):
         raise last
     raise DailyLimitError(f"Every {kind} model has hit its daily limit today ({', '.join(chain)}). "
                           "Waiting a minute will not help: the quotas refill gradually over about 24 hours.")
@@ -408,6 +420,9 @@ def _try_models(chain, system, user, images, max_tokens, temperature, daily_seen
             last = e
             nxt = next((x for x in chain[i + 1:] if x not in _exhausted), None)
             log(f"  Daily limit reached for '{m}'." + (f" Trying '{nxt}' instead ..." if nxt else ""))
+        except RequestTooLargeError as e:
+            log(f"  '{m}' cannot fit this request in its TPM budget ({str(e)[:160]}); trying the next model ...")
+            last = last or e
         except RuntimeError as e:
             if not daily_seen and not any(x in _exhausted for x in chain[:i]):
                 raise                           # the first-choice model failed for another reason: report it as before
